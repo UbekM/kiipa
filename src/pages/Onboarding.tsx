@@ -334,7 +334,7 @@ export default function Onboarding() {
   };
 
   const handleSkip = () => {
-    navigate("/dashboard");
+    setCurrentStep(onboardingSteps.length - 1);
   };
 
   const step = onboardingSteps[currentStep];
