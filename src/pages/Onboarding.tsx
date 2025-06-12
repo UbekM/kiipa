@@ -319,6 +319,12 @@ export default function Onboarding() {
     setIsVisible(true);
   }, []);
 
+  useEffect(() => {
+    if (currentStep === onboardingSteps.length - 1 && isConnected) {
+      navigate("/dashboard");
+    }
+  }, [currentStep, isConnected, navigate]);
+
   const handleNext = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
