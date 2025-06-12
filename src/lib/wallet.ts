@@ -1,4 +1,5 @@
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
+import { PinataSDK } from "pinata";
 
 // Lisk blockchain configuration
 const liskMainnet = {
@@ -96,17 +97,44 @@ export const KEEPR_CONTRACTS = {
   },
 } as const;
 
-// IPFS utilities for encrypted storage
-export const uploadToIPFS = async (data: any): Promise<string> => {
-  // This would integrate with IPFS provider
-  // For now, return a mock hash
-  console.log("Uploading to IPFS:", data);
-  return "QmMockIPFSHash123...";
+const PINATA_JWT = import.meta.env.VITE_PINATA_JWT;
+const PINATA_GATEWAY = import.meta.env.VITE_PINATA_GATEWAY;
+
+const pinata = new PinataSDK({
+  pinataJwt: PINATA_JWT,
+  pinataGateway: PINATA_GATEWAY,
+});
+
+// Upload data to IPFS via Pinata (supports JSON or File)
+export const uploadToIPFS = async (
+  data: any,
+  options?: { name?: string; keyvalues?: Record<string, string> }
+): Promise<string> => {
+  let upload;
+  if (data instanceof File) {
+    upload = pinata.upload.public.file(data);
+    if (options?.name) upload = upload.name(options.name);
+    if (options?.keyvalues) upload = upload.keyvalues(options.keyvalues);
+  } else {
+    upload = pinata.upload.public.json(data);
+    if (options?.name) upload = upload.name(options.name);
+    if (options?.keyvalues) upload = upload.keyvalues(options.keyvalues);
+  }
+  const result = await upload;
+  console.log("result", result);  
+  return result.cid;
 };
 
-export const downloadFromIPFS = async (hash: string): Promise<any> => {
-  // This would retrieve from IPFS
-  // For now, return mock data
-  console.log("Downloading from IPFS:", hash);
-  return { encrypted: true, data: "mock encrypted data" };
+// Download data from IPFS via Pinata gateway
+export const downloadFromIPFS = async (cid: string): Promise<any> => {
+  const url = `https://${PINATA_GATEWAY}/ipfs/${cid}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error("Failed to fetch from IPFS via Pinata gateway");
+  // Try to parse as JSON, fallback to text
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 };

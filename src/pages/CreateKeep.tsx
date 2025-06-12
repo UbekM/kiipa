@@ -39,6 +39,14 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 import { ethers } from "ethers";
+import {
+  getEncryptionPublicKey,
+  generateSymmetricKey,
+  symmetricEncrypt,
+  exportSymmetricKey,
+  asymmetricEncrypt,
+} from "@/lib/encryption";
+import { uploadToIPFS } from "@/lib/wallet";
 
 // Add your contract ABI and address
 const KEEPR_ABI = [
@@ -110,10 +118,59 @@ export default function CreateKeep() {
         throw new Error("Please provide either text content or upload a file");
       }
 
-      // TODO: Implement encryption
-      // TODO: Implement IPFS upload
-      // For demo, use a placeholder IPFS hash
-      const ipfsHash = "QmPlaceholderHash"; // Replace with real hash after upload
+      // 1. Prepare content as ArrayBuffer
+      let contentBuffer: ArrayBuffer;
+      if (keepData.file) {
+        contentBuffer = await keepData.file.arrayBuffer();
+      } else {
+        contentBuffer = new TextEncoder().encode(keepData.content);
+      }
+
+      // 2. Generate symmetric key
+      const symmetricKey = await generateSymmetricKey();
+
+      // 3. Encrypt content with symmetric key
+      const { ciphertext, iv } = await symmetricEncrypt(
+        contentBuffer,
+        symmetricKey,
+      );
+
+      // 4. Get public keys for owner and fallback
+      const ownerPublicKey = await getEncryptionPublicKey(keepData.recipient);
+      const fallbackPublicKey = keepData.fallbackRecipient
+        ? await getEncryptionPublicKey(keepData.fallbackRecipient)
+        : null;
+
+      // 5. Export and encrypt symmetric key for both
+      const exportedKey = new Uint8Array(
+        await exportSymmetricKey(symmetricKey),
+      );
+      const encryptedOwnerKey = asymmetricEncrypt(exportedKey, ownerPublicKey);
+      const encryptedFallbackKey = fallbackPublicKey
+        ? asymmetricEncrypt(exportedKey, fallbackPublicKey)
+        : null;
+
+      // 6. Upload encrypted content to IPFS (include IV for decryption)
+      const ipfsPayload = {
+        ciphertext: Array.from(new Uint8Array(ciphertext)),
+        iv: Array.from(iv),
+        encryptedOwnerKey,
+        encryptedFallbackKey,
+        meta: {
+          title: keepData.title,
+          description: keepData.description,
+          type: keepData.type,
+        },
+      };
+      const ipfsHash = await uploadToIPFS(ipfsPayload, {
+        name: keepData.title,
+        keyvalues: {
+          recipient: keepData.recipient,
+          ...(keepData.fallbackRecipient
+            ? { fallback: keepData.fallbackRecipient }
+            : {}),
+        },
+      });
 
       // Smart contract interaction
       if (!(window as any).ethereum) {
