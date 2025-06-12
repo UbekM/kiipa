@@ -1,0 +1,134 @@
+{
+  "name": "Keepr - Secure Your Digital Legacy",
+  "short_name": "Keepr",
+  "description": "Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage on blockchain.",
+  "theme_color": "#00473E",
+  "background_color": "#EAF5EF",
+  "display": "standalone",
+  "scope": "/",
+  "start_url": "/",
+  "id": "/",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
+  "categories": ["security", "productivity", "finance"],
+  "display_override": ["window-controls-overlay", "standalone", "minimal-ui"],
+  "lang": "en-US",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "./keepr-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./keepr-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "security", "productivity", "utilities"],
+  "shortcuts": [
+    {
+      "name": "Create Keep",
+      "short_name": "Create",
+      "description": "Create a new encrypted Keep",
+      "url": "/create",
+      "icons": [
+        {
+          "src": "/keepr-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "short_name": "Dashboard",
+      "description": "View your active Keeps",
+      "url": "/dashboard",
+      "icons": [
+        {
+          "src": "/keepr-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "short_name": "Profile",
+      "description": "Manage your settings",
+      "url": "/profile",
+      "icons": [
+        {
+          "src": "/keepr-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Keepr mobile interface"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [
+    {
+      "protocol": "web+keepr",
+      "url": "/handle?url=%s"
+    }
+  ],
+  "handle_links": "preferred",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://keepr.app/manifest.json"
+    }
+  ]
+}

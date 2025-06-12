@@ -1,0 +1,404 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Keepr brand colors in HSL */
+    --background: 155 60% 94%; /* #EAF5EF - Mist Green */
+    --foreground: 162 30% 9%; /* #0D1F1A - Ink Green */
+    --card: 155 60% 94%;
+    --card-foreground: 162 30% 9%;
+    --popover: 155 60% 94%;
+    --popover-foreground: 162 30% 9%;
+    --primary: 172 100% 14%; /* #00473E - Forest Deep */
+    --primary-foreground: 155 60% 94%;
+    --secondary: 160 73% 22%; /* #0A5F4A - Pine Fade */
+    --secondary-foreground: 155 60% 94%;
+    --muted: 160 30% 85%;
+    --muted-foreground: 162 30% 25%;
+    --accent: 162 46% 34%; /* #2F7F6D - Emerald Touch */
+    --accent-foreground: 155 60% 94%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 160 30% 80%;
+    --input: 160 30% 80%;
+    --ring: 172 100% 14%;
+    --radius: 1rem;
+
+    /* Native app specific variables */
+    --safe-area-inset-top: env(safe-area-inset-top);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom);
+    --safe-area-inset-left: env(safe-area-inset-left);
+    --safe-area-inset-right: env(safe-area-inset-right);
+  }
+
+  .dark {
+    --background: 162 30% 9%;
+    --foreground: 155 60% 94%;
+    --card: 162 30% 12%;
+    --card-foreground: 155 60% 94%;
+    --popover: 162 30% 12%;
+    --popover-foreground: 155 60% 94%;
+    --primary: 155 60% 94%;
+    --primary-foreground: 172 100% 14%;
+    --secondary: 160 73% 22%;
+    --secondary-foreground: 155 60% 94%;
+    --muted: 162 30% 20%;
+    --muted-foreground: 155 30% 70%;
+    --accent: 162 46% 34%;
+    --accent-foreground: 155 60% 94%;
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 162 30% 20%;
+    --input: 162 30% 20%;
+    --ring: 155 60% 94%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    font-size: 16px;
+    height: 100%;
+    height: -webkit-fill-available;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
+    height: 100vh;
+    height: -webkit-fill-available;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Prevent zoom on iOS */
+    -webkit-text-size-adjust: 100%;
+    /* Better touch scrolling on iOS */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  #root {
+    height: 100vh;
+    height: -webkit-fill-available;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Custom scrollbar for webkit browsers */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-emerald-touch/30 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-emerald-touch/50;
+  }
+
+  /* Remove default button styling */
+  button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Better input styling on mobile */
+  input,
+  textarea,
+  select {
+    @apply rounded-xl;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+  /* Prevent zoom on input focus (iOS) */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
+@layer components {
+  /* Native app-like container */
+  .app-container {
+    @apply relative w-full h-full flex flex-col;
+    padding-top: var(--safe-area-inset-top);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+    padding-right: var(--safe-area-inset-right);
+  }
+
+  /* Mobile-first page wrapper */
+  .mobile-page {
+    @apply flex-1 flex flex-col relative;
+    min-height: 0; /* Important for flex layout */
+  }
+
+  /* Native-style header */
+  .mobile-header {
+    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-forest-deep/5;
+    padding-top: max(var(--safe-area-inset-top), 0.5rem);
+  }
+
+  /* Content area with safe spacing */
+  .mobile-content {
+    @apply flex-1 overflow-auto;
+    padding-bottom: max(var(--safe-area-inset-bottom), 1rem);
+  }
+
+  /* Native app button styles */
+  .btn-native {
+    @apply bg-forest-deep text-white font-semibold px-6 py-4 rounded-2xl transition-all duration-200 shadow-lg;
+    @apply active:scale-95 active:shadow-md;
+    @apply hover:bg-pine-fade hover:shadow-xl;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20;
+    touch-action: manipulation;
+  }
+
+  .btn-native-outline {
+    @apply border-2 border-forest-deep text-forest-deep font-semibold px-6 py-4 rounded-2xl transition-all duration-200;
+    @apply active:scale-95 active:bg-forest-deep/5;
+    @apply hover:bg-forest-deep hover:text-white;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20;
+    touch-action: manipulation;
+  }
+
+  .btn-native-ghost {
+    @apply text-forest-deep font-medium px-6 py-4 rounded-2xl transition-all duration-200;
+    @apply active:scale-95 active:bg-forest-deep/5;
+    @apply hover:bg-forest-deep/5;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20;
+    touch-action: manipulation;
+  }
+
+  /* Native card styling */
+  .card-native {
+    @apply bg-white/60 backdrop-blur-md border border-white/40 rounded-3xl shadow-xl;
+    @apply transition-all duration-300;
+  }
+
+  .card-native:hover {
+    @apply shadow-2xl transform scale-[1.02];
+  }
+
+  /* Mobile-optimized spacing */
+  .mobile-spacing {
+    @apply px-4 py-6 sm:px-6 sm:py-8;
+  }
+
+  .mobile-spacing-tight {
+    @apply px-4 py-3 sm:px-6 sm:py-4;
+  }
+
+  /* Touch-friendly interactive elements */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    @apply flex items-center justify-center;
+  }
+
+  /* Smooth page transitions */
+  .page-transition {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  .page-enter {
+    @apply opacity-0 translate-y-4;
+  }
+
+  .page-enter-active {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .page-exit {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .page-exit-active {
+    @apply opacity-0 -translate-y-4;
+  }
+
+  /* Native-style progress indicators */
+  .progress-dots {
+    @apply flex gap-2 justify-center;
+  }
+
+  .progress-dot {
+    @apply w-2 h-2 rounded-full transition-all duration-300;
+  }
+
+  .progress-dot.active {
+    @apply bg-forest-deep w-6;
+  }
+
+  .progress-dot.inactive {
+    @apply bg-forest-deep/20;
+  }
+
+  /* Floating action button */
+  .fab {
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-forest-deep text-white rounded-full shadow-2xl;
+    @apply flex items-center justify-center transition-all duration-300;
+    @apply active:scale-90 hover:shadow-2xl hover:bg-pine-fade;
+    z-index: 1000;
+    bottom: max(1.5rem, var(--safe-area-inset-bottom));
+  }
+
+  /* Native input styling */
+  .input-native {
+    @apply w-full px-4 py-4 bg-white/60 backdrop-blur-md border border-white/40 rounded-2xl;
+    @apply text-forest-deep placeholder-forest-deep/50;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20 focus:border-forest-deep;
+    @apply transition-all duration-200;
+  }
+
+  /* Status bar styling */
+  .status-bar-bg {
+    background: linear-gradient(
+      135deg,
+      rgba(234, 245, 239, 0.95) 0%,
+      rgba(0, 71, 62, 0.05) 100%
+    );
+  }
+
+  /* Native list styling */
+  .list-native {
+    @apply space-y-2;
+  }
+
+  .list-item-native {
+    @apply bg-white/60 backdrop-blur-md border border-white/40 rounded-2xl p-4;
+    @apply transition-all duration-200 active:scale-[0.98];
+  }
+
+  /* Bottom sheet style modal */
+  .bottom-sheet {
+    @apply fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl;
+    @apply transition-transform duration-300 ease-out;
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+
+  /* Haptic feedback simulation */
+  .haptic-light {
+    @apply transition-all duration-75 active:scale-95;
+  }
+
+  .haptic-medium {
+    @apply transition-all duration-100 active:scale-90;
+  }
+
+  .haptic-heavy {
+    @apply transition-all duration-150 active:scale-85;
+  }
+}
+
+/* iOS specific styles */
+@supports (-webkit-touch-callout: none) {
+  .ios-bounce-fix {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .ios-safe-area {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Android specific styles */
+@media (hover: none) and (pointer: coarse) {
+  .touch-device .hover\:scale-105:hover {
+    transform: scale(1);
+  }
+
+  .touch-device .hover\:shadow-lg:hover {
+    box-shadow: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .card-native {
+    @apply border-2 border-forest-deep;
+  }
+
+  .btn-native {
+    @apply border-2 border-forest-deep;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Dark mode media query support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 162 30% 9%;
+    --foreground: 155 60% 94%;
+  }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 500px) {
+  .mobile-spacing {
+    @apply px-4 py-2 sm:px-6 sm:py-3;
+  }
+
+  .mobile-header {
+    @apply py-2;
+  }
+}
+
+/* Loading shimmer effect */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(234, 245, 239, 0.2) 0px,
+    rgba(47, 127, 109, 0.1) 40px,
+    rgba(234, 245, 239, 0.2) 80px
+  );
+  background-size: 400px;
+  animation: shimmer 1.5s ease-in-out infinite;
+}

@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+
+    <!-- Enhanced Mobile Viewport -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+
+    <!-- PWA Theme and Colors -->
+    <meta name="theme-color" content="#00473E" />
+    <meta name="msapplication-navbutton-color" content="#00473E" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Keepr" />
+    <link rel="apple-touch-icon" href="/keepr-192.png" />
+
+    <!-- SEO and Description -->
+    <meta
+      name="description"
+      content="Keepr - Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage on blockchain."
+    />
+    <meta
+      name="keywords"
+      content="digital inheritance, blockchain, crypto wallet, secure storage, decentralized, IPFS, Lisk"
+    />
+    <meta name="author" content="Keepr" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://keepr.app/" />
+    <meta property="og:title" content="Keepr - Secure Your Digital Legacy" />
+    <meta
+      property="og:description"
+      content="Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage."
+    />
+    <meta property="og:image" content="/keepr-512.png" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://keepr.app/" />
+    <meta
+      property="twitter:title"
+      content="Keepr - Secure Your Digital Legacy"
+    />
+    <meta
+      property="twitter:description"
+      content="Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage."
+    />
+    <meta property="twitter:image" content="/keepr-512.png" />
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="/keepr-icon.svg" />
+    <link rel="apple-touch-icon" href="/keepr-192.png" />
+
+    <!-- Enhanced PWA Icons for different sizes -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/keepr-icon.svg" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/keepr-icon.svg" />
+    <link rel="shortcut icon" href="/keepr-icon.svg" />
+
+    <!-- Space Grotesk Font - Optimized Loading -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- iOS PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Keepr" />
+    <meta name="apple-touch-fullscreen" content="yes" />
+
+    <!-- Prevent iOS zoom on input focus -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Android PWA -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Keepr" />
+
+    <!-- Windows -->
+    <meta name="msapplication-TileColor" content="#00473E" />
+    <meta name="msapplication-TileImage" content="/keepr-144.png" />
+    <meta name="msapplication-config" content="/browserconfig.xml" />
+
+    <!-- Enhanced Splash Screens for iOS - iPhone sizes -->
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-640x1136.png"
+      media="(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-750x1334.png"
+      media="(device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1242x2208.png"
+      media="(device-width: 414px) and (device-height: 736px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1125x2436.png"
+      media="(device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3) and (orientation: portrait)"
+    />
+    <link
+      rel="apple-touch-startup-image"
+      href="/splash-1536x2048.png"
+      media="(device-width: 768px) and (device-height: 1024px) and (-webkit-device-pixel-ratio: 2) and (orientation: portrait)"
+    />
+
+    <!-- Modern Safari Support -->
+    <meta name="supported-color-schemes" content="light dark" />
+    <meta name="color-scheme" content="light dark" />
+
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="DENY" />
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+
+    <!-- Preload Critical Resources -->
+    <link rel="preload" href="/keepr-icon.svg" as="image" />
+
+    <!-- DNS Prefetch for External Resources -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="//fonts.gstatic.com" />
+
+    <title>Keepr - Secure Your Digital Legacy</title>
+
+    <!-- Critical CSS to prevent FOUC -->
+    <style>
+      /* Critical loading styles */
+      #root {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        background: linear-gradient(135deg, #eaf5ef 0%, #ffffff 100%);
+      }
+
+      /* Loading spinner */
+      .loading-spinner {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border: 3px solid #eaf5ef;
+        border-top: 3px solid #00473e;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+          transform: translate(-50%, -50%) rotate(360deg);
+        }
+      }
+
+      /* Hide loading when React loads */
+      #root:not(:empty) .loading-spinner {
+        display: none;
+      }
+
+      /* Prevent flash of unstyled content */
+      body {
+        font-family:
+          "Space Grotesk",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+      }
+
+      /* Safe area support */
+      @supports (padding: max(0px)) {
+        body {
+          padding-left: env(safe-area-inset-left);
+          padding-right: env(safe-area-inset-right);
+        }
+      }
+    </style>
+  </head>
+
+  <body class="font-sans antialiased">
+    <div id="root">
+      <!-- Loading indicator -->
+      <div class="loading-spinner"></div>
+    </div>
+
+    <script type="module" src="/src/main.tsx"></script>
+
+    <script>
+      // Enhanced service worker registration with update handling
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", async () => {
+          try {
+            const registration = await navigator.serviceWorker.register(
+              "/sw.js",
+              {
+                scope: "/",
+                updateViaCache: "none",
+                immediate: true,
+              },
+            );
+
+            console.log("SW registered successfully:", registration.scope);
+
+            // Handle service worker updates
+            registration.addEventListener("updatefound", () => {
+              const newWorker = registration.installing;
+              if (newWorker) {
+                newWorker.addEventListener("statechange", () => {
+                  if (
+                    newWorker.state === "installed" &&
+                    navigator.serviceWorker.controller
+                  ) {
+                    // New service worker is available
+                    console.log("New service worker available");
+                    // Could show update notification to user
+                    if (confirm("New version available! Reload to update?")) {
+                      newWorker.postMessage({ type: "SKIP_WAITING" });
+                      window.location.reload();
+                    }
+                  }
+                });
+              }
+            });
+
+            // Listen for service worker messages
+            navigator.serviceWorker.addEventListener("message", (event) => {
+              console.log("Message from service worker:", event.data);
+              if (event.data.type === "BACKGROUND_SYNC") {
+                // Handle background sync notifications
+                console.log("Background sync:", event.data.message);
+              }
+            });
+          } catch (error) {
+            console.log("SW registration failed:", error);
+          }
+        });
+
+        // Handle service worker controller change
+        navigator.serviceWorker.addEventListener("controllerchange", () => {
+          console.log("Service worker controller changed");
+          window.location.reload();
+        });
+      }
+
+      // Install prompt handling
+      // let deferredPrompt;
+      // window.addEventListener("beforeinstallprompt", (e) => {
+      //   console.log("Install prompt available");
+      //   e.preventDefault();
+      //   deferredPrompt = e;
+      //   // Could show custom install button
+      // });
+
+      // // Handle successful installation
+      // window.addEventListener("appinstalled", () => {
+      //   console.log("App installed successfully");
+      //   deferredPrompt = null;
+      // });
+
+      // Prevent zoom on iOS when input is focused
+      document.addEventListener(
+        "touchstart",
+        function (e) {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        { passive: false },
+      );
+
+      let lastTouchEnd = 0;
+      document.addEventListener(
+        "touchend",
+        function (e) {
+          const now = new Date().getTime();
+          if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+          }
+          lastTouchEnd = now;
+        },
+        false,
+      );
+
+      // Handle network status changes
+      window.addEventListener("online", () => {
+        console.log("App is online");
+        // Could show online status
+      });
+
+      window.addEventListener("offline", () => {
+        console.log("App is offline");
+        // Could show offline status
+      });
+
+      // Handle orientation changes (mobile)
+      window.addEventListener("orientationchange", () => {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+        }, 100);
+      });
+
+      // Performance monitoring
+      window.addEventListener("load", () => {
+        if ("performance" in window) {
+          const perfData = performance.getEntriesByType("navigation")[0];
+          console.log(
+            "Page load time:",
+            perfData.loadEventEnd - perfData.fetchStart,
+            "ms",
+          );
+        }
+      });
+    </script>
+  </body>
+</html>
