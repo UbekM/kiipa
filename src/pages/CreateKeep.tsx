@@ -173,36 +173,36 @@ export default function CreateKeep() {
       });
 
       // Smart contract interaction
-      if (!(window as any).ethereum) {
-        throw new Error("Wallet not detected. Please connect your wallet.");
-      }
-      const provider = new ethers.BrowserProvider((window as any).ethereum);
-      const signer = await provider.getSigner();
-      const contract = new ethers.Contract(KEEPR_ADDRESS, KEEPR_ABI, signer);
+      // if (!(window as any).ethereum) {
+      //   throw new Error("Wallet not detected. Please connect your wallet.");
+      // }
+      // const provider = new ethers.BrowserProvider((window as any).ethereum);
+      // const signer = await provider.getSigner();
+      // const contract = new ethers.Contract(KEEPR_ADDRESS, KEEPR_ABI, signer);
 
-      // Prepare arguments
-      const _ipfsHash = ipfsHash;
-      const _keepType = keepData.type;
-      const _recipient = keepData.recipient;
-      const _fallbackRecipient =
-        keepData.fallbackRecipient || ethers.ZeroAddress;
-      const _unlockTime = Math.floor(
-        keepData.unlockTime
-          ? new Date(keepData.unlockTime).getTime() / 1000
-          : Date.now() / 1000,
-      );
-      const _allowFallback = !!keepData.fallbackRecipient;
+      // // Prepare arguments
+      // const _ipfsHash = ipfsHash;
+      // const _keepType = keepData.type;
+      // const _recipient = keepData.recipient;
+      // const _fallbackRecipient =
+      //   keepData.fallbackRecipient || ethers.ZeroAddress;
+      // const _unlockTime = Math.floor(
+      //   keepData.unlockTime
+      //     ? new Date(keepData.unlockTime).getTime() / 1000
+      //     : Date.now() / 1000,
+      // );
+      // const _allowFallback = !!keepData.fallbackRecipient;
 
-      // Call createKeep
-      const tx = await contract.createKeep(
-        _ipfsHash,
-        _keepType,
-        _recipient,
-        _fallbackRecipient,
-        _unlockTime,
-        _allowFallback,
-      );
-      await tx.wait();
+      // // Call createKeep
+      // const tx = await contract.createKeep(
+      //   _ipfsHash,
+      //   _keepType,
+      //   _recipient,
+      //   _fallbackRecipient,
+      //   _unlockTime,
+      //   _allowFallback,
+      // );
+      // await tx.wait();
 
       toast({
         title: "Keep Created",
