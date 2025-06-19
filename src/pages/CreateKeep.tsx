@@ -37,9 +37,13 @@ import {
   exportSymmetricKey,
   getEncryptionPublicKey,
   asymmetricEncrypt,
+  getEncryptionKeys,
 } from "@/lib/encryption";
 import { uploadToIPFS } from "@/lib/wallet";
-import { useWeb3ModalAccount } from "@web3modal/ethers/react";
+import {
+  useWeb3ModalAccount,
+  useWeb3ModalProvider,
+} from "@web3modal/ethers/react";
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -60,6 +64,7 @@ export default function CreateKeep() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { address } = useWeb3ModalAccount();
+  const { provider } = useWeb3ModalProvider();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [keepData, setKeepData] = useState({
@@ -114,6 +119,9 @@ export default function CreateKeep() {
         throw new Error("Please provide either text content or upload a file");
       }
 
+      // 0. Ensure creator has encryption keys
+      await getEncryptionKeys(address!, provider);
+
       // 1. Prepare content as ArrayBuffer
       let contentBuffer: ArrayBuffer;
       if (keepData.file) {
@@ -131,13 +139,17 @@ export default function CreateKeep() {
         symmetricKey,
       );
 
-      // 4. Get public keys for owner and fallback
-      const ownerPublicKey = await getEncryptionPublicKey(keepData.recipient);
+      // 4. Get public keys for owner, fallback, and creator
+      const ownerPublicKey = await getEncryptionPublicKey(
+        keepData.recipient,
+        provider,
+      );
       const fallbackPublicKey = keepData.fallbackRecipient
-        ? await getEncryptionPublicKey(keepData.fallbackRecipient)
+        ? await getEncryptionPublicKey(keepData.fallbackRecipient, provider)
         : null;
+      const creatorPublicKey = await getEncryptionPublicKey(address!, provider);
 
-      // 5. Export and encrypt symmetric key for both
+      // 5. Export and encrypt symmetric key for all parties
       const exportedKey = new Uint8Array(
         await exportSymmetricKey(symmetricKey),
       );
@@ -145,13 +157,22 @@ export default function CreateKeep() {
       const encryptedFallbackKey = fallbackPublicKey
         ? asymmetricEncrypt(exportedKey, fallbackPublicKey)
         : null;
+      const encryptedCreatorKey = asymmetricEncrypt(
+        exportedKey,
+        creatorPublicKey,
+      );
 
       // 6. Upload encrypted content to IPFS
       const ipfsPayload = {
         ciphertext: Array.from(new Uint8Array(ciphertext)),
         iv: Array.from(iv),
-        encryptedOwnerKey,
-        encryptedFallbackKey,
+        encryptedOwnerKey: Array.from(new Uint8Array(await encryptedOwnerKey)),
+        encryptedFallbackKey: encryptedFallbackKey
+          ? Array.from(new Uint8Array(await encryptedFallbackKey))
+          : undefined,
+        encryptedCreatorKey: Array.from(
+          new Uint8Array(await encryptedCreatorKey),
+        ),
         meta: {
           title: keepData.title,
           description: keepData.description,

@@ -146,8 +146,12 @@ export const uploadToIPFS = async (
 export const downloadFromIPFS = async (cid: string): Promise<any> => {
   try {
     // Use the SDK's gateway method for better reliability
-    const data = await pinata.gateways.public.get(cid);
-    console.log("IPFS data retrieved:", data);
+    const response = await pinata.gateways.public.get(cid);
+    console.log("IPFS data retrieved:", response);
+    
+    // Extract the actual data from the response
+    const data = response.data || response;
+    console.log("Extracted IPFS data:", data);
     return data;
   } catch (error) {
     console.error("Error downloading from IPFS:", error);
