@@ -1,4 +1,5 @@
 import { createWeb3Modal, defaultConfig } from "@web3modal/ethers/react";
+import { useWeb3ModalProvider } from '@web3modal/ethers/react';
 import { PinataSDK } from "pinata";
 
 // Lisk blockchain configuration
@@ -110,31 +111,126 @@ export const uploadToIPFS = async (
   data: any,
   options?: { name?: string; keyvalues?: Record<string, string> }
 ): Promise<string> => {
-  let upload;
-  if (data instanceof File) {
-    upload = pinata.upload.public.file(data);
-    if (options?.name) upload = upload.name(options.name);
-    if (options?.keyvalues) upload = upload.keyvalues(options.keyvalues);
-  } else {
-    upload = pinata.upload.public.json(data);
-    if (options?.name) upload = upload.name(options.name);
-    if (options?.keyvalues) upload = upload.keyvalues(options.keyvalues);
+  try {
+    let result;
+    
+    if (data instanceof File) {
+      // For files, use the file upload method with metadata
+      result = await pinata.upload.public
+        .file(data)
+        .name(options?.name || 'keep')
+        .keyvalues({
+          ...options?.keyvalues,
+          status: 'active' // Always set an initial status
+        });
+    } else {
+      // For JSON data, use the JSON upload method with metadata
+      result = await pinata.upload.public
+        .json(data)
+        .name(options?.name || 'keep')
+        .keyvalues({
+          ...options?.keyvalues,
+          status: 'active' // Always set an initial status
+        });
+    }
+    
+    console.log("Pinata upload result:", result);
+    return result.cid;
+  } catch (error) {
+    console.error("Error uploading to IPFS:", error);
+    throw new Error("Failed to upload to IPFS");
   }
-  const result = await upload;
-  console.log("result", result);  
-  return result.cid;
 };
 
 // Download data from IPFS via Pinata gateway
 export const downloadFromIPFS = async (cid: string): Promise<any> => {
-  const url = `https://${PINATA_GATEWAY}/ipfs/${cid}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error("Failed to fetch from IPFS via Pinata gateway");
-  // Try to parse as JSON, fallback to text
-  const text = await res.text();
   try {
-    return JSON.parse(text);
-  } catch {
-    return text;
+    // Use the SDK's gateway method for better reliability
+    const data = await pinata.gateways.public.get(cid);
+    console.log("IPFS data retrieved:", data);
+    return data;
+  } catch (error) {
+    console.error("Error downloading from IPFS:", error);
+    // Fallback to direct gateway URL
+    const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error("Failed to fetch from IPFS via Pinata gateway");
+    const text = await res.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      return text;
+    }
+  }
+};
+
+// List files from Pinata using the SDK
+export const listFiles = async (filters?: {
+  name?: string;
+  keyvalues?: Record<string, string>;
+  status?: string;
+}): Promise<any[]> => {
+  try {
+    // Use the raw API approach as shown in the documentation
+    const response = await fetch("https://api.pinata.cloud/data/pinList", {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${PINATA_JWT}`,
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch files from Pinata');
+    }
+
+    const data = await response.json();
+    console.log("Pinata files list:", data);
+    return data.rows || [];
+  } catch (error) {
+    console.error("Error listing files:", error);
+    throw new Error("Failed to list files from Pinata");
+  }
+};
+
+export const isNetworkSupported = async (): Promise<boolean> => {
+  try {
+    const { walletProvider } = useWeb3ModalProvider();
+    if (!walletProvider) return false;
+    
+    const chainId = await walletProvider.request({ method: 'eth_chainId' });
+    return isLiskNetwork(parseInt(chainId, 16));
+  } catch (error) {
+    console.error("Error checking network:", error);
+    return false;
+  }
+};
+
+export const switchToSupportedNetwork = async (): Promise<void> => {
+  try {
+    const { walletProvider } = useWeb3ModalProvider();
+    if (!walletProvider) throw new Error("No provider available");
+
+    await walletProvider.request({
+      method: "wallet_addEthereumChain",
+      params: [{
+        chainId: `0x${liskMainnet.chainId.toString(16)}`,
+        chainName: liskMainnet.name,
+        nativeCurrency: {
+          name: liskMainnet.currency,
+          symbol: liskMainnet.currency,
+          decimals: 18
+        },
+        rpcUrls: [liskMainnet.rpcUrl],
+        blockExplorerUrls: [liskMainnet.explorerUrl]
+      }]
+    });
+
+    await walletProvider.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: `0x${liskMainnet.chainId.toString(16)}` }]
+    });
+  } catch (error) {
+    console.error("Error switching network:", error);
+    throw new Error("Failed to switch to supported network");
   }
 };

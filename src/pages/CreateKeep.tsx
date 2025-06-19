@@ -39,6 +39,7 @@ import {
   asymmetricEncrypt,
 } from "@/lib/encryption";
 import { uploadToIPFS } from "@/lib/wallet";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -58,6 +59,7 @@ const getTypeIcon = (type: string) => {
 export default function CreateKeep() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { address } = useWeb3ModalAccount();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [keepData, setKeepData] = useState({
@@ -161,6 +163,7 @@ export default function CreateKeep() {
         name: keepData.title,
         keyvalues: {
           recipient: keepData.recipient,
+          creator: address,
           ...(keepData.fallbackRecipient
             ? { fallback: keepData.fallbackRecipient }
             : {}),

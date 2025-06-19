@@ -29,6 +29,7 @@ export interface Keep {
   description?: string;
   recipient: string;
   fallback?: string;
+  creator?: string;
   unlockTime: Date;
   createdAt: Date;
   status: "active" | "unlocked" | "claimed" | "cancelled";
@@ -42,8 +43,10 @@ interface KeepCardProps {
   onEdit?: (keep: Keep) => void;
   onCancel?: (keep: Keep) => void;
   onClaim?: (keep: Keep) => void;
+  onReveal?: (keep: Keep) => void;
   showActions?: boolean;
   compact?: boolean;
+  currentUserAddress?: string;
 }
 
 export function KeepCard({
@@ -52,8 +55,10 @@ export function KeepCard({
   onEdit,
   onCancel,
   onClaim,
+  onReveal,
   showActions = true,
   compact = false,
+  currentUserAddress,
 }: KeepCardProps) {
   const getStatusConfig = (status: Keep["status"]) => {
     switch (status) {
@@ -124,6 +129,7 @@ export function KeepCard({
   const isExpired = keep.unlockTime < new Date();
   const canClaim =
     keep.status === "unlocked" || (isExpired && keep.status === "active");
+  const isCreator = currentUserAddress && keep.creator === currentUserAddress;
   const statusConfig = getStatusConfig(keep.status);
   const typeConfig = getKeepTypeConfig(keep.keepType);
   const TypeIcon = typeConfig.icon;
@@ -185,6 +191,19 @@ export function KeepCard({
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+          {isCreator && (
+            <Button
+              onClick={(e) => {
+                e.stopPropagation();
+                onReveal?.(keep);
+              }}
+              size="sm"
+              className="btn-native text-xs px-3 py-2 h-8 bg-blue-500 hover:bg-blue-600"
+            >
+              Reveal
+            </Button>
+          )}
+
           {canClaim && (
             <Button
               onClick={(e) => {
