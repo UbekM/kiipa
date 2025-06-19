@@ -29,30 +29,31 @@ import {
 } from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
-import { ethers } from "ethers";
 import {
-  getEncryptionPublicKey,
   generateSymmetricKey,
   symmetricEncrypt,
   exportSymmetricKey,
+  getEncryptionPublicKey,
   asymmetricEncrypt,
 } from "@/lib/encryption";
 import { uploadToIPFS } from "@/lib/wallet";
 
-// Add your contract ABI and address
-const KEEPR_ABI = [
-  // ...paste your ABI here...
-];
-const KEEPR_ADDRESS = "0x2F72BAeD02B119A64594aA4cad157707b8f85649";
+const getTypeIcon = (type: string) => {
+  switch (type) {
+    case "secret":
+      return Shield;
+    case "document":
+      return FileText;
+    case "key":
+      return Key;
+    case "inheritance":
+      return Heart;
+    default:
+      return Shield;
+  }
+};
 
 export default function CreateKeep() {
   const navigate = useNavigate();
@@ -63,10 +64,10 @@ export default function CreateKeep() {
     title: "",
     description: "",
     type: "secret",
+    content: "",
     recipient: "",
     fallbackRecipient: "",
     unlockTime: "",
-    content: "",
     file: null as File | null,
     fileName: "",
   });
@@ -74,6 +75,14 @@ export default function CreateKeep() {
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 50 * 1024 * 1024) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "File size must be less than 50MB",
+        });
+        return;
+      }
       setKeepData((prev) => ({
         ...prev,
         file,
@@ -90,21 +99,6 @@ export default function CreateKeep() {
     }));
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
-    }
-  };
-
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case "secret":
-        return Shield;
-      case "document":
-        return FileText;
-      case "key":
-        return Key;
-      case "inheritance":
-        return Heart;
-      default:
-        return Shield;
     }
   };
 
@@ -150,7 +144,7 @@ export default function CreateKeep() {
         ? asymmetricEncrypt(exportedKey, fallbackPublicKey)
         : null;
 
-      // 6. Upload encrypted content to IPFS (include IV for decryption)
+      // 6. Upload encrypted content to IPFS
       const ipfsPayload = {
         ciphertext: Array.from(new Uint8Array(ciphertext)),
         iv: Array.from(iv),
@@ -162,6 +156,7 @@ export default function CreateKeep() {
           type: keepData.type,
         },
       };
+
       const ipfsHash = await uploadToIPFS(ipfsPayload, {
         name: keepData.title,
         keyvalues: {
@@ -171,38 +166,6 @@ export default function CreateKeep() {
             : {}),
         },
       });
-
-      // Smart contract interaction
-      // if (!(window as any).ethereum) {
-      //   throw new Error("Wallet not detected. Please connect your wallet.");
-      // }
-      // const provider = new ethers.BrowserProvider((window as any).ethereum);
-      // const signer = await provider.getSigner();
-      // const contract = new ethers.Contract(KEEPR_ADDRESS, KEEPR_ABI, signer);
-
-      // // Prepare arguments
-      // const _ipfsHash = ipfsHash;
-      // const _keepType = keepData.type;
-      // const _recipient = keepData.recipient;
-      // const _fallbackRecipient =
-      //   keepData.fallbackRecipient || ethers.ZeroAddress;
-      // const _unlockTime = Math.floor(
-      //   keepData.unlockTime
-      //     ? new Date(keepData.unlockTime).getTime() / 1000
-      //     : Date.now() / 1000,
-      // );
-      // const _allowFallback = !!keepData.fallbackRecipient;
-
-      // // Call createKeep
-      // const tx = await contract.createKeep(
-      //   _ipfsHash,
-      //   _keepType,
-      //   _recipient,
-      //   _fallbackRecipient,
-      //   _unlockTime,
-      //   _allowFallback,
-      // );
-      // await tx.wait();
 
       toast({
         title: "Keep Created",
@@ -261,7 +224,7 @@ export default function CreateKeep() {
                     Set up the basic information for your Keep
                   </CardDescription>
                 </div>
-                <div className="w-12 h-12  rounded-xl flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl flex items-center justify-center">
                   {React.createElement(getTypeIcon(keepData.type), {
                     className: "w-6 h-6 text-forest-deep",
                   })}
