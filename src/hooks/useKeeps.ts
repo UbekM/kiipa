@@ -8,12 +8,14 @@ export function useKeeps() {
   const [keeps, setKeeps] = useState<Keep[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [failedKeeps, setFailedKeeps] = useState<string[]>([]);
 
   const fetchKeeps = async () => {
     if (!address) return;
     
     setLoading(true);
     setError(null);
+    setFailedKeeps([]);
     
     try {
       console.log('Fetching keeps for address:', address);
@@ -53,22 +55,88 @@ export function useKeeps() {
             createdAt: new Date(row.date_pinned),
             status: keepData.meta?.status || row.metadata?.keyvalues?.status || "active",
             ipfsHash: row.ipfs_pin_hash,
-            keepType: keepData.meta?.type || "secret"
+            keepType: keepData.meta?.type || "secret",
+            ipfsError: false
           };
         } catch (err) {
-          console.error('Error fetching keep data:', err);
-          return null;
+          console.error('Error fetching keep data for hash:', row.ipfs_pin_hash, err);
+          
+          // Create a keep object with basic metadata and error flag
+          const fallbackKeep: Keep = {
+            id: row.ipfs_pin_hash,
+            title: row.metadata?.keyvalues?.title || 'Keep (Unavailable)',
+            description: 'Content temporarily unavailable due to IPFS retrieval error',
+            recipient: row.metadata?.keyvalues?.recipient || "",
+            fallback: row.metadata?.keyvalues?.fallback,
+            creator: row.metadata?.keyvalues?.creator,
+            unlockTime: new Date(row.metadata?.keyvalues?.unlockTime || Date.now()),
+            createdAt: new Date(row.date_pinned),
+            status: "error",
+            ipfsHash: row.ipfs_pin_hash,
+            keepType: row.metadata?.keyvalues?.type || "secret",
+            ipfsError: true,
+            errorMessage: err instanceof Error ? err.message : 'Failed to retrieve content'
+          };
+          
+          setFailedKeeps(prev => [...prev, row.ipfs_pin_hash]);
+          return fallbackKeep;
         }
       });
 
-      const fetchedKeeps = (await Promise.all(keepPromises)).filter(Boolean) as Keep[];
+      const fetchedKeeps = (await Promise.all(keepPromises)) as Keep[];
       console.log('Final processed keeps:', fetchedKeeps);
       setKeeps(fetchedKeeps);
+      
+      // Show warning if some keeps failed to load
+      if (failedKeeps.length > 0) {
+        console.warn(`${failedKeeps.length} keeps failed to load from IPFS`);
+      }
     } catch (err) {
       console.error('Error fetching keeps:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch keeps');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Retry fetching a specific keep
+  const retryKeep = async (keepId: string) => {
+    try {
+      console.log('Retrying fetch for keep:', keepId);
+      const keepData = await downloadFromIPFS(keepId);
+      
+      setKeeps(prevKeeps => 
+        prevKeeps.map(keep => 
+          keep.id === keepId 
+            ? {
+                ...keep,
+                title: keepData.meta?.title || 'Untitled Keep',
+                description: keepData.meta?.description || '',
+                status: keepData.meta?.status || "active",
+                keepType: keepData.meta?.type || "secret",
+                ipfsError: false,
+                errorMessage: undefined
+              }
+            : keep
+        )
+      );
+      
+      setFailedKeeps(prev => prev.filter(id => id !== keepId));
+      
+      console.log('Successfully retried keep:', keepId);
+    } catch (err) {
+      console.error('Failed to retry keep:', keepId, err);
+      // Update the error message
+      setKeeps(prevKeeps => 
+        prevKeeps.map(keep => 
+          keep.id === keepId 
+            ? {
+                ...keep,
+                errorMessage: err instanceof Error ? err.message : 'Failed to retrieve content'
+              }
+            : keep
+        )
+      );
     }
   };
 
@@ -93,7 +161,9 @@ export function useKeeps() {
     keeps,
     loading,
     error,
+    failedKeeps,
     searchKeeps,
-    refreshKeeps: fetchKeeps
+    refreshKeeps: fetchKeeps,
+    retryKeep
   };
 } 

@@ -33,7 +33,15 @@ import { LoadingState } from "@/components/LoadingState";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { isConnected, address } = useWeb3ModalAccount();
-  const { keeps, loading, error, searchKeeps, refreshKeeps } = useKeeps();
+  const {
+    keeps,
+    loading,
+    error,
+    failedKeeps,
+    searchKeeps,
+    refreshKeeps,
+    retryKeep,
+  } = useKeeps();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("active");
   const [showSearch, setShowSearch] = useState(false);
@@ -299,6 +307,36 @@ export default function Dashboard() {
               </TabsList>
             </Tabs>
 
+            {/* Failed Keeps Warning */}
+            {failedKeeps.length > 0 && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-yellow-800 text-sm mb-1">
+                      Some keeps couldn't be loaded
+                    </p>
+                    <p className="text-yellow-700 text-xs mb-3">
+                      {failedKeeps.length} keep
+                      {failedKeeps.length > 1 ? "s" : ""} failed to load from
+                      IPFS. You can retry loading them individually or refresh
+                      all keeps.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={refreshKeeps}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-3 py-1 h-7 border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                      >
+                        Refresh All
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Keeps List */}
             <div className="space-y-4">
               {filteredKeeps.length === 0 ? (
@@ -316,6 +354,7 @@ export default function Dashboard() {
                     onCancel={() => handleKeepAction("cancel", keep)}
                     onClaim={() => handleKeepAction("claim", keep)}
                     onReveal={() => handleKeepAction("reveal", keep)}
+                    onRetry={retryKeep}
                   />
                 ))
               )}

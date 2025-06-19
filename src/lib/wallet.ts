@@ -155,15 +155,43 @@ export const downloadFromIPFS = async (cid: string): Promise<any> => {
     return data;
   } catch (error) {
     console.error("Error downloading from IPFS:", error);
-    // Fallback to direct gateway URL
-    const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
-    const res = await fetch(url);
-    if (!res.ok) throw new Error("Failed to fetch from IPFS via Pinata gateway");
-    const text = await res.text();
+    
+    // Try fallback to direct gateway URL
     try {
-      return JSON.parse(text);
-    } catch {
-      return text;
+      const url = `https://gateway.pinata.cloud/ipfs/${cid}`;
+      const res = await fetch(url);
+      
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error("Content not found on IPFS - it may have been removed or the hash is invalid");
+        } else if (res.status >= 500) {
+          throw new Error("IPFS gateway is temporarily unavailable - please try again later");
+        } else {
+          throw new Error(`Failed to fetch from IPFS (HTTP ${res.status})`);
+        }
+      }
+      
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return text;
+      }
+    } catch (fallbackError) {
+      console.error("Fallback IPFS fetch also failed:", fallbackError);
+      
+      // Provide a more specific error message based on the original error
+      if (error instanceof Error) {
+        if (error.message.includes('timeout') || error.message.includes('ETIMEDOUT')) {
+          throw new Error("IPFS request timed out - please check your connection and try again");
+        } else if (error.message.includes('network') || error.message.includes('fetch')) {
+          throw new Error("Network error - please check your internet connection");
+        } else if (error.message.includes('gateway')) {
+          throw new Error("IPFS gateway error - please try again later");
+        }
+      }
+      
+      throw new Error("Failed to retrieve content from IPFS - please try again later");
     }
   }
 };

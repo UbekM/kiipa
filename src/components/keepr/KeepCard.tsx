@@ -32,9 +32,11 @@ export interface Keep {
   creator?: string;
   unlockTime: Date;
   createdAt: Date;
-  status: "active" | "unlocked" | "claimed" | "cancelled";
+  status: "active" | "unlocked" | "claimed" | "cancelled" | "error";
   ipfsHash: string;
   keepType: "secret" | "document" | "key" | "inheritance";
+  ipfsError?: boolean;
+  errorMessage?: string;
 }
 
 interface KeepCardProps {
@@ -44,6 +46,7 @@ interface KeepCardProps {
   onCancel?: (keep: Keep) => void;
   onClaim?: (keep: Keep) => void;
   onReveal?: (keep: Keep) => void;
+  onRetry?: (keepId: string) => void;
   showActions?: boolean;
   compact?: boolean;
   currentUserAddress?: string;
@@ -56,6 +59,7 @@ export function KeepCard({
   onCancel,
   onClaim,
   onReveal,
+  onRetry,
   showActions = true,
   compact = false,
   currentUserAddress,
@@ -82,6 +86,11 @@ export function KeepCard({
         return {
           color: "bg-gray-500/10 text-gray-600 border-gray-500/20",
           label: "Cancelled",
+        };
+      case "error":
+        return {
+          color: "bg-red-500/10 text-red-600 border-red-500/20",
+          label: "Error",
         };
       default:
         return {
@@ -166,6 +175,37 @@ export function KeepCard({
               <p className="text-sm text-muted-foreground line-clamp-1">
                 {keep.description}
               </p>
+            )}
+
+            {/* Error State */}
+            {keep.ipfsError && (
+              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-red-800 font-medium mb-1">
+                      Content Unavailable
+                    </p>
+                    <p className="text-xs text-red-600 mb-2">
+                      {keep.errorMessage ||
+                        "Failed to retrieve content from IPFS"}
+                    </p>
+                    {onRetry && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onRetry(keep.id);
+                        }}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-3 py-1 h-7 border-red-300 text-red-700 hover:bg-red-100"
+                      >
+                        Retry
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
 
             <div className="flex items-center gap-2 mt-1">
