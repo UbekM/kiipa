@@ -12,6 +12,7 @@ import Onboarding from "./pages/Onboarding";
 import Dashboard from "./pages/Dashboard";
 import CreateKeep from "./pages/CreateKeep";
 import KeepDetails from "./pages/KeepDetails";
+import KeepReveal from "./pages/KeepReveal";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import FallbackClaim from "./pages/FallbackClaim";
@@ -143,6 +144,7 @@ function AppRoutes() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/create" element={<CreateKeep />} />
         <Route path="/keep/:id" element={<KeepDetails />} />
+        <Route path="/keep/:id/reveal" element={<KeepReveal />} />
         <Route path="/keep/:id/edit" element={<CreateKeep />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/fallback-claim" element={<FallbackClaim />} />

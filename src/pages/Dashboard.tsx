@@ -27,14 +27,21 @@ import { WalletConnection } from "@/components/wallet/WalletConnection";
 import { KeepCard, Keep } from "@/components/keepr/KeepCard";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { InstallPrompt } from "@/components/keepr/InstallPrompt";
-
-// Mock data for demonstration
-const mockKeeps: Keep[] = [];
+import { useKeeps } from "@/hooks/useKeeps";
+import { LoadingState } from "@/components/LoadingState";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { isConnected, address } = useWeb3ModalAccount();
-  const [keeps, setKeeps] = useState<Keep[]>(mockKeeps);
+  const {
+    keeps,
+    loading,
+    error,
+    failedKeeps,
+    searchKeeps,
+    refreshKeeps,
+    retryKeep,
+  } = useKeeps();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("active");
   const [showSearch, setShowSearch] = useState(false);
@@ -47,43 +54,69 @@ export default function Dashboard() {
   }, [isConnected, navigate]);
 
   // Filter keeps based on search and tab
-  const filteredKeeps = keeps.filter((keep) => {
-    const matchesSearch =
-      keep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      keep.description?.toLowerCase().includes(searchQuery.toLowerCase());
-
-    switch (selectedTab) {
-      case "active":
-        return matchesSearch && keep.status === "active";
-      case "claimable":
-        return (
-          matchesSearch &&
-          (keep.status === "unlocked" ||
-            (keep.unlockTime < new Date() && keep.status === "active"))
-        );
-      case "claimed":
-        return matchesSearch && keep.status === "claimed";
-      case "all":
-      default:
-        return matchesSearch;
-    }
-  });
+  const filteredKeeps = searchKeeps(
+    searchQuery,
+    undefined,
+    selectedTab === "all" ? undefined : selectedTab,
+  );
 
   // Calculate statistics
   const stats = {
-    total: 0,
-    active: 0,
-    claimable: 0,
-    claimed: 0,
+    total: keeps.length,
+    active: keeps.filter((k) => k.status === "active").length,
+    claimable: keeps.filter(
+      (k) =>
+        k.status === "unlocked" ||
+        (k.unlockTime < new Date() && k.status === "active"),
+    ).length,
+    claimed: keeps.filter((k) => k.status === "claimed").length,
   };
 
-  const handleKeepAction = (action: string, keep: Keep) => {
-    console.log(`${action} keep:`, keep.id);
-    // Implement keep actions here
+  const handleKeepAction = async (action: string, keep: Keep) => {
+    switch (action) {
+      case "view":
+        navigate(`/keep/${keep.id}`);
+        break;
+      case "claim":
+        // Implement claim functionality
+        console.log("Claiming keep:", keep.id);
+        break;
+      case "reveal":
+        // Implement reveal functionality for creators
+        console.log("Revealing keep:", keep.id);
+        navigate(`/keep/${keep.id}/reveal`);
+        break;
+      case "edit":
+        navigate(`/keep/${keep.id}/edit`);
+        break;
+      case "cancel":
+        // Implement cancel functionality
+        console.log("Cancelling keep:", keep.id);
+        break;
+      default:
+        console.log(`Unknown action: ${action}`);
+    }
   };
 
   if (!isConnected) {
     return null; // Will redirect via useEffect
+  }
+
+  if (loading) {
+    return <LoadingState />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-forest-deep mb-2">
+          Error Loading Keeps
+        </h2>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <Button onClick={refreshKeeps}>Try Again</Button>
+      </div>
+    );
   }
 
   return (
@@ -219,164 +252,126 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Search Bar */}
-            <div className="mb-6">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search your Keeps..."
+            {/* Search and Filter */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="flex-1 relative">
+                <Input
+                  placeholder="Search keeps..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input-native pl-12 pr-4"
+                  className="pl-10"
                 />
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
+              <Button
+                variant="outline"
+                size="icon"
+                className="shrink-0 border-forest-deep/20"
+              >
+                <Filter className="w-4 h-4" />
+              </Button>
             </div>
 
-            {/* Keeps Tabs */}
+            {/* Tabs */}
             <Tabs
+              defaultValue="active"
               value={selectedTab}
               onValueChange={setSelectedTab}
-              className="space-y-6"
+              className="mb-6"
             >
-              <TabsList className="grid w-full grid-cols-4 bg-white/60 backdrop-blur-md border border-white/40 rounded-2xl p-1">
+              <TabsList className="grid grid-cols-4 bg-transparent gap-2">
                 <TabsTrigger
                   value="active"
-                  className="data-[state=active]:bg-forest-deep data-[state=active]:text-white rounded-xl font-medium"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   Active
                 </TabsTrigger>
                 <TabsTrigger
                   value="claimable"
-                  className="data-[state=active]:bg-yellow-500 data-[state=active]:text-white rounded-xl font-medium"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   Ready
                 </TabsTrigger>
                 <TabsTrigger
                   value="claimed"
-                  className="data-[state=active]:bg-blue-500 data-[state=active]:text-white rounded-xl font-medium"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   Claimed
                 </TabsTrigger>
                 <TabsTrigger
                   value="all"
-                  className="data-[state=active]:bg-forest-deep data-[state=active]:text-white rounded-xl font-medium"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   All
                 </TabsTrigger>
               </TabsList>
-
-              <TabsContent value={selectedTab} className="space-y-4">
-                {filteredKeeps.length === 0 ? (
-                  <div className="card-native p-8 text-center">
-                    <div className="w-16 h-16 bg-muted/10 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <Archive className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-bold text-forest-deep mb-2">
-                      No Keeps Found
-                    </h3>
-                    <p className="text-muted-foreground mb-6 text-sm">
-                      {searchQuery
-                        ? `No Keeps match "${searchQuery}"`
-                        : "Welcome to Keepr! Create your first encrypted Keep to start securing your digital legacy"}
-                    </p>
-                    {!searchQuery && (
-                      <div className="space-y-4">
-                        <Button
-                          onClick={() => navigate("/create")}
-                          className="btn-native"
-                        >
-                          <Plus className="w-4 h-4 mr-2" />
-                          Create Your First Keep
-                        </Button>
-                        <p className="text-xs text-muted-foreground">
-                          Your data is end-to-end encrypted and stored on IPFS
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {filteredKeeps.map((keep) => (
-                      <KeepCard
-                        key={keep.id}
-                        keep={keep}
-                        onView={(keep) => navigate(`/keep/${keep.id}`)}
-                        onEdit={(keep) => navigate(`/keep/${keep.id}/edit`)}
-                        onClaim={(keep) => handleKeepAction("claim", keep)}
-                        onCancel={(keep) => handleKeepAction("cancel", keep)}
-                        compact={true}
-                      />
-                    ))}
-                  </div>
-                )}
-              </TabsContent>
             </Tabs>
 
-            {/* Quick Actions */}
-            {filteredKeeps.length > 0 && (
-              <div className="card-native p-6 mt-8">
-                <div className="flex items-center gap-2 mb-4">
-                  <TrendingUp className="w-5 h-5 text-forest-deep" />
-                  <h3 className="font-bold text-forest-deep">Quick Actions</h3>
-                </div>
-
-                <div className="space-y-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate("/create")}
-                    className="w-full justify-between border-forest-deep/20 hover:bg-forest-deep/5 rounded-xl p-4 h-auto"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Plus className="w-4 h-4" />
-                      <span>Create New Keep</span>
+            {/* Failed Keeps Warning */}
+            {failedKeeps.length > 0 && (
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-yellow-800 text-sm mb-1">
+                      Some keeps couldn't be loaded
+                    </p>
+                    <p className="text-yellow-700 text-xs mb-3">
+                      {failedKeeps.length} keep
+                      {failedKeeps.length > 1 ? "s" : ""} failed to load from
+                      IPFS. You can retry loading them individually or refresh
+                      all keeps.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={refreshKeeps}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-3 py-1 h-7 border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                      >
+                        Refresh All
+                      </Button>
                     </div>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-
-                  <Button
-                    variant="outline"
-                    onClick={() => navigate("/profile")}
-                    className="w-full justify-between border-forest-deep/20 hover:bg-forest-deep/5 rounded-xl p-4 h-auto"
-                  >
-                    <div className="flex items-center gap-3">
-                      <Settings className="w-4 h-4" />
-                      <span>Update Settings</span>
-                    </div>
-                    <ArrowRight className="w-4 h-4" />
-                  </Button>
-
-                  {stats.claimable > 0 && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setSelectedTab("claimable")}
-                      className="w-full justify-between border-yellow-500/20 hover:bg-yellow-500/5 rounded-xl p-4 h-auto"
-                    >
-                      <div className="flex items-center gap-3">
-                        <Users className="w-4 h-4 text-yellow-600" />
-                        <span className="text-yellow-600">Review Claims</span>
-                      </div>
-                      <Badge variant="destructive" className="h-5 px-2">
-                        {stats.claimable}
-                      </Badge>
-                    </Button>
-                  )}
+                  </div>
                 </div>
               </div>
             )}
 
-            {/* Bottom padding for FAB */}
-            <div className="h-20" />
+            {/* Keeps List */}
+            <div className="space-y-4">
+              {filteredKeeps.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">No keeps found</p>
+                </div>
+              ) : (
+                filteredKeeps.map((keep) => (
+                  <KeepCard
+                    key={keep.id}
+                    keep={keep}
+                    currentUserAddress={address}
+                    onView={() => handleKeepAction("view", keep)}
+                    onEdit={() => handleKeepAction("edit", keep)}
+                    onCancel={() => handleKeepAction("cancel", keep)}
+                    onClaim={() => handleKeepAction("claim", keep)}
+                    onReveal={() => handleKeepAction("reveal", keep)}
+                    onRetry={retryKeep}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Create Keep Button */}
+            <div className="fixed bottom-8 right-8">
+              <Button
+                size="lg"
+                className="btn-keepr h-14 w-14 rounded-full shadow-lg"
+                onClick={() => navigate("/create")}
+              >
+                <Plus className="w-6 h-6" />
+              </Button>
+            </div>
           </div>
         </div>
-
-        {/* Floating Action Button */}
-        <button
-          onClick={() => navigate("/create")}
-          className="fab haptic-medium"
-        >
-          <Plus className="w-6 h-6" />
-        </button>
       </div>
     </div>
   );
