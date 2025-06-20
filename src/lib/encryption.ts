@@ -160,90 +160,126 @@ export async function asymmetricDecrypt(
 export async function deriveEncryptionKey(address: string, walletProvider: any): Promise<CryptoKey> {
   console.log("Deriving encryption key for address:", address);
   
+  if (!walletProvider) {
+    throw new Error("Wallet provider is required for encryption key derivation");
+  }
+  
+  if (!walletProvider.request) {
+    throw new Error("Invalid wallet provider - request method not available");
+  }
+  
   // Create a deterministic message based on the address
   const message = `Keepr Encryption Key for ${address}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
   
-  // Sign the message with the wallet
-  const signature = await walletProvider.request({
-    method: 'personal_sign',
-    params: [data, address]
-  });
-  
-  // Use the signature as a seed for key derivation
-  const signatureBytes = new Uint8Array(Buffer.from(signature.slice(2), 'hex'));
-  
-  // Import the signature as a raw key
-  const derivedKey = await window.crypto.subtle.importKey(
-    'raw',
-    signatureBytes,
-    { name: 'PBKDF2' },
-    false,
-    ['deriveBits', 'deriveKey']
-  );
-  
-  // Derive a final key using PBKDF2
-  const finalKey = await window.crypto.subtle.deriveKey(
-    {
-      name: 'PBKDF2',
-      salt: encoder.encode('keepr-salt'),
-      iterations: 100000,
-      hash: 'SHA-256'
-    },
-    derivedKey,
-    { name: 'AES-GCM', length: 256 },
-    true,
-    ['encrypt', 'decrypt']
-  );
-  
-  console.log("Successfully derived encryption key");
-  return finalKey;
+  try {
+    // Sign the message with the wallet
+    const signature = await walletProvider.request({
+      method: 'personal_sign',
+      params: [data, address]
+    });
+    
+    // Use the signature as a seed for key derivation
+    const signatureBytes = new Uint8Array(Buffer.from(signature.slice(2), 'hex'));
+    
+    // Import the signature as a raw key
+    const derivedKey = await window.crypto.subtle.importKey(
+      'raw',
+      signatureBytes,
+      { name: 'PBKDF2' },
+      false,
+      ['deriveBits', 'deriveKey']
+    );
+    
+    // Derive a final key using PBKDF2
+    const finalKey = await window.crypto.subtle.deriveKey(
+      {
+        name: 'PBKDF2',
+        salt: encoder.encode('keepr-salt'),
+        iterations: 100000,
+        hash: 'SHA-256'
+      },
+      derivedKey,
+      { name: 'AES-GCM', length: 256 },
+      true,
+      ['encrypt', 'decrypt']
+    );
+    
+    console.log("Successfully derived encryption key");
+    return finalKey;
+  } catch (error) {
+    console.error("Error deriving encryption key:", error);
+    if (error instanceof Error && error.message.includes('User rejected')) {
+      throw new Error("User rejected the signature request. Please approve the signature to continue.");
+    }
+    throw new Error("Failed to derive encryption key. Please ensure your wallet is connected and try again.");
+  }
 }
 
 // Deterministic RSA key generation using wallet signature
 export async function generateDeterministicKeyPair(address: string, walletProvider: any): Promise<CryptoKeyPair> {
   console.log("Generating deterministic key pair for address:", address);
   
+  if (!walletProvider) {
+    throw new Error("Wallet provider is required for key pair generation");
+  }
+  
+  if (!walletProvider.request) {
+    throw new Error("Invalid wallet provider - request method not available");
+  }
+  
   // Create a deterministic message based on the address
   const message = `Keepr RSA Key Pair for ${address}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
   
-  // Sign the message with the wallet
-  const signature = await walletProvider.request({
-    method: 'personal_sign',
-    params: [data, address]
-  });
-  
-  // Use the signature as a seed for deterministic key generation
-  const signatureBytes = new Uint8Array(Buffer.from(signature.slice(2), 'hex'));
-  
-  // Create a deterministic seed from the signature
-  const seed = await window.crypto.subtle.digest('SHA-256', signatureBytes);
-  const seedArray = new Uint8Array(seed);
-  
-  // Use the seed to generate a deterministic key pair
-  // Note: Web Crypto API doesn't support seeded key generation directly
-  // So we'll use a workaround by creating a deterministic seed
-  const keyPair = await window.crypto.subtle.generateKey(
-    {
-      name: "RSA-OAEP",
-      modulusLength: 2048,
-      publicExponent: new Uint8Array([1, 0, 1]),
-      hash: "SHA-256",
-    },
-    true,
-    ["encrypt", "decrypt"]
-  );
-  
-  console.log("Generated deterministic key pair for address:", address);
-  return keyPair;
+  try {
+    // Sign the message with the wallet
+    const signature = await walletProvider.request({
+      method: 'personal_sign',
+      params: [data, address]
+    });
+    
+    // Use the signature as a seed for deterministic key generation
+    const signatureBytes = new Uint8Array(Buffer.from(signature.slice(2), 'hex'));
+    
+    // Create a deterministic seed from the signature
+    const seed = await window.crypto.subtle.digest('SHA-256', signatureBytes);
+    const seedArray = new Uint8Array(seed);
+    
+    // Use the seed to generate a deterministic key pair
+    // Note: Web Crypto API doesn't support seeded key generation directly
+    // So we'll use a workaround by creating a deterministic seed
+    const keyPair = await window.crypto.subtle.generateKey(
+      {
+        name: "RSA-OAEP",
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: "SHA-256",
+      },
+      true,
+      ["encrypt", "decrypt"]
+    );
+    
+    console.log("Generated deterministic key pair for address:", address);
+    return keyPair;
+  } catch (error) {
+    console.error("Error generating deterministic key pair:", error);
+    if (error instanceof Error && error.message.includes('User rejected')) {
+      throw new Error("User rejected the signature request. Please approve the signature to continue.");
+    }
+    throw new Error("Failed to generate encryption keys. Please ensure your wallet is connected and try again.");
+  }
 }
 
 // Get or generate encryption keys for an address (without storing private keys)
 export async function getEncryptionKeys(address: string, walletProvider: any): Promise<{ publicKey: string; privateKey: CryptoKey }> {
   console.log("Getting/Generating encryption keys for address:", address);
+  
+  if (!walletProvider) {
+    throw new Error("Wallet provider is required for encryption key operations");
+  }
   
   // Check if we already have a key pair for this address
   const publicKeyId = `keepr:publicKey:${address}`;
