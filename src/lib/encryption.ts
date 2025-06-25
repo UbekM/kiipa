@@ -164,11 +164,12 @@ export async function deriveEncryptionKey(address: string, walletProvider: any):
   const message = `Keepr Encryption Key for ${address}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
+  const hexMessage = '0x' + Buffer.from(data).toString('hex');
   
   // Sign the message with the wallet
   const signature = await walletProvider.request({
     method: 'personal_sign',
-    params: [data, address]
+    params: [hexMessage, address]
   });
   
   // Use the signature as a seed for key derivation
@@ -204,25 +205,26 @@ export async function deriveEncryptionKey(address: string, walletProvider: any):
 // Deterministic RSA key generation using wallet signature
 export async function generateDeterministicKeyPair(address: string, walletProvider: any): Promise<CryptoKeyPair> {
   console.log("Generating deterministic key pair for address:", address);
-  
+
   // Create a deterministic message based on the address
   const message = `Keepr RSA Key Pair for ${address}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
-  
+  const hexMessage = '0x' + Buffer.from(data).toString('hex'); // <-- convert to hex string
+
   // Sign the message with the wallet
   const signature = await walletProvider.request({
     method: 'personal_sign',
-    params: [data, address]
+    params: [hexMessage, address] // <-- use hex string
   });
-  
+
   // Use the signature as a seed for deterministic key generation
   const signatureBytes = new Uint8Array(Buffer.from(signature.slice(2), 'hex'));
-  
+
   // Create a deterministic seed from the signature
   const seed = await window.crypto.subtle.digest('SHA-256', signatureBytes);
   const seedArray = new Uint8Array(seed);
-  
+
   // Use the seed to generate a deterministic key pair
   // Note: Web Crypto API doesn't support seeded key generation directly
   // So we'll use a workaround by creating a deterministic seed
@@ -236,7 +238,7 @@ export async function generateDeterministicKeyPair(address: string, walletProvid
     true,
     ["encrypt", "decrypt"]
   );
-  
+
   console.log("Generated deterministic key pair for address:", address);
   return keyPair;
 }
@@ -393,4 +395,4 @@ export async function decryptKeep(
     console.error("Error decrypting keep:", error);
     throw new Error("Failed to decrypt keep content");
   }
-} 
+}

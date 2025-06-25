@@ -64,7 +64,7 @@ export default function CreateKeep() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { address } = useWeb3ModalAccount();
-  const { provider } = useWeb3ModalProvider();
+  const { walletProvider } = useWeb3ModalProvider();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [keepData, setKeepData] = useState({
@@ -119,10 +119,10 @@ export default function CreateKeep() {
         throw new Error("Please provide either text content or upload a file");
       }
 
-      // 0. Ensure creator has encryption keys
-      await getEncryptionKeys(address!, provider);
+      console.log("Step 0: getEncryptionKeys");
+      await getEncryptionKeys(address!, walletProvider);
 
-      // 1. Prepare content as ArrayBuffer
+      console.log("Step 1: Prepare content");
       let contentBuffer: ArrayBuffer;
       if (keepData.file) {
         contentBuffer = await keepData.file.arrayBuffer();
@@ -130,48 +130,53 @@ export default function CreateKeep() {
         contentBuffer = new TextEncoder().encode(keepData.content);
       }
 
-      // 2. Generate symmetric key
+      console.log("Step 2: generateSymmetricKey");
       const symmetricKey = await generateSymmetricKey();
 
-      // 3. Encrypt content with symmetric key
+      console.log("Step 3: symmetricEncrypt");
       const { ciphertext, iv } = await symmetricEncrypt(
         contentBuffer,
         symmetricKey,
       );
 
-      // 4. Get public keys for owner, fallback, and creator
+      console.log("Step 4: getEncryptionPublicKey (owner)");
       const ownerPublicKey = await getEncryptionPublicKey(
         keepData.recipient,
-        provider,
+        walletProvider,
       );
+      console.log("Step 4: getEncryptionPublicKey (fallback)");
       const fallbackPublicKey = keepData.fallbackRecipient
-        ? await getEncryptionPublicKey(keepData.fallbackRecipient, provider)
+        ? await getEncryptionPublicKey(keepData.fallbackRecipient, walletProvider)
         : null;
-      const creatorPublicKey = await getEncryptionPublicKey(address!, provider);
+      console.log("Step 4: getEncryptionPublicKey (creator)");
+      const creatorPublicKey = await getEncryptionPublicKey(address!, walletProvider);
 
-      // 5. Export and encrypt symmetric key for all parties
+      console.log("Step 5: exportSymmetricKey");
       const exportedKey = new Uint8Array(
         await exportSymmetricKey(symmetricKey),
       );
-      const encryptedOwnerKey = asymmetricEncrypt(exportedKey, ownerPublicKey);
+      console.log("Step 5: asymmetricEncrypt (owner)");
+      const encryptedOwnerKey = await asymmetricEncrypt(exportedKey, ownerPublicKey);
+      console.log("Step 5: asymmetricEncrypt (fallback)");
       const encryptedFallbackKey = fallbackPublicKey
-        ? asymmetricEncrypt(exportedKey, fallbackPublicKey)
+        ? await asymmetricEncrypt(exportedKey, fallbackPublicKey)
         : null;
-      const encryptedCreatorKey = asymmetricEncrypt(
+      console.log("Step 5: asymmetricEncrypt (creator)");
+      const encryptedCreatorKey = await asymmetricEncrypt(
         exportedKey,
         creatorPublicKey,
       );
 
-      // 6. Upload encrypted content to IPFS
+      console.log("Step 6: uploadToIPFS");
       const ipfsPayload = {
         ciphertext: Array.from(new Uint8Array(ciphertext)),
         iv: Array.from(iv),
-        encryptedOwnerKey: Array.from(new Uint8Array(await encryptedOwnerKey)),
+        encryptedOwnerKey: Array.from(new Uint8Array(encryptedOwnerKey)),
         encryptedFallbackKey: encryptedFallbackKey
-          ? Array.from(new Uint8Array(await encryptedFallbackKey))
+          ? Array.from(new Uint8Array(encryptedFallbackKey))
           : undefined,
         encryptedCreatorKey: Array.from(
-          new Uint8Array(await encryptedCreatorKey),
+          new Uint8Array(encryptedCreatorKey),
         ),
         meta: {
           title: keepData.title,
@@ -197,6 +202,7 @@ export default function CreateKeep() {
       });
       navigate("/dashboard");
     } catch (error) {
+      console.error("CreateKeep error:", error);
       toast({
         variant: "destructive",
         title: "Error",
