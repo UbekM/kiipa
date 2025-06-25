@@ -142,11 +142,14 @@ export default function CreateKeep() {
       console.log("Step 4: getEncryptionPublicKey (owner)");
       const ownerPublicKey = await getEncryptionPublicKey(
         keepData.recipient,
-        walletProvider,
+        keepData.recipient === address ? walletProvider : undefined
       );
       console.log("Step 4: getEncryptionPublicKey (fallback)");
       const fallbackPublicKey = keepData.fallbackRecipient
-        ? await getEncryptionPublicKey(keepData.fallbackRecipient, walletProvider)
+        ? await getEncryptionPublicKey(
+            keepData.fallbackRecipient,
+            keepData.fallbackRecipient === address ? walletProvider : undefined
+          )
         : null;
       console.log("Step 4: getEncryptionPublicKey (creator)");
       const creatorPublicKey = await getEncryptionPublicKey(address!, walletProvider);
