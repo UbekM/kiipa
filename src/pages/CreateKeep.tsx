@@ -145,12 +145,20 @@ export default function CreateKeep() {
         keepData.recipient === address ? walletProvider : undefined
       );
       console.log("Step 4: getEncryptionPublicKey (fallback)");
-      const fallbackPublicKey = keepData.fallbackRecipient
-        ? await getEncryptionPublicKey(
+      let fallbackPublicKey: CryptoKey | null = null;
+      let fallbackWarning = "";
+
+      if (keepData.fallbackRecipient) {
+        try {
+          fallbackPublicKey = await getEncryptionPublicKey(
             keepData.fallbackRecipient,
             keepData.fallbackRecipient === address ? walletProvider : undefined
-          )
-        : null;
+          );
+        } catch (err) {
+          fallbackWarning = "Fallback recipient has not set up their encryption key. The keep will be created, but the fallback will not be able to decrypt until they set up their key.";
+          // fallbackPublicKey remains null
+        }
+      }
       console.log("Step 4: getEncryptionPublicKey (creator)");
       const creatorPublicKey = await getEncryptionPublicKey(address!, walletProvider);
 
@@ -198,6 +206,14 @@ export default function CreateKeep() {
             : {}),
         },
       });
+
+      if (fallbackWarning) {
+        toast({
+          variant: "default",
+          title: "Fallback Recipient Not Ready",
+          description: fallbackWarning,
+        });
+      }
 
       toast({
         title: "Keep Created",
