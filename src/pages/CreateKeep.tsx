@@ -44,6 +44,7 @@ import {
   useWeb3ModalAccount,
   useWeb3ModalProvider,
 } from "@web3modal/ethers/react";
+import { isNetworkSupported, switchToSupportedNetwork } from "@/lib/wallet";
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -114,13 +115,73 @@ export default function CreateKeep() {
     setLoading(true);
 
     try {
+      // Validate wallet connection
+      if (!address) {
+        throw new Error("Please connect your wallet first");
+      }
+
+      if (!provider) {
+        throw new Error(
+          "Wallet provider not available. Please reconnect your wallet.",
+        );
+      }
+
+      // Check if user is on a supported network
+      const isSupported = await isNetworkSupported(provider);
+      if (!isSupported) {
+        toast({
+          variant: "destructive",
+          title: "Unsupported Network",
+          description:
+            "Please switch to Lisk Mainnet or Sepolia to create keeps.",
+        });
+        try {
+          await switchToSupportedNetwork(provider);
+          toast({
+            title: "Network Switched",
+            description:
+              "Successfully switched to Lisk network. Please try creating your keep again.",
+          });
+        } catch (switchError) {
+          toast({
+            variant: "destructive",
+            title: "Network Switch Failed",
+            description:
+              "Please manually switch to Lisk Mainnet or Sepolia in your wallet.",
+          });
+        }
+        return;
+      }
+
       // Validate content
       if (!keepData.content && !keepData.file) {
         throw new Error("Please provide either text content or upload a file");
       }
 
+
       console.log("Step 0: getEncryptionKeys");
-      await getEncryptionKeys(address!, walletProvider);
+
+      // Validate recipient address
+      if (
+        !keepData.recipient ||
+        !/^0x[a-fA-F0-9]{40}$/.test(keepData.recipient)
+      ) {
+        throw new Error("Please enter a valid recipient wallet address");
+      }
+
+      // Validate fallback recipient address if provided
+      if (
+        keepData.fallbackRecipient &&
+        !/^0x[a-fA-F0-9]{40}$/.test(keepData.fallbackRecipient)
+      ) {
+        throw new Error(
+          "Please enter a valid fallback recipient wallet address",
+        );
+      }
+
+      // 0. Ensure creator has encryption keys
+      await getEncryptionKeys(address, provider);
+
 
       console.log("Step 1: Prepare content");
       let contentBuffer: ArrayBuffer;
@@ -144,23 +205,13 @@ export default function CreateKeep() {
         keepData.recipient,
         keepData.recipient === address ? walletProvider : undefined
       );
-      console.log("Step 4: getEncryptionPublicKey (fallback)");
-      let fallbackPublicKey: CryptoKey | null = null;
-      let fallbackWarning = "";
 
-      if (keepData.fallbackRecipient) {
-        try {
-          fallbackPublicKey = await getEncryptionPublicKey(
-            keepData.fallbackRecipient,
-            keepData.fallbackRecipient === address ? walletProvider : undefined
-          );
-        } catch (err) {
-          fallbackWarning = "Fallback recipient has not set up their encryption key. The keep will be created, but the fallback will not be able to decrypt until they set up their key.";
-          // fallbackPublicKey remains null
-        }
-      }
       console.log("Step 4: getEncryptionPublicKey (creator)");
-      const creatorPublicKey = await getEncryptionPublicKey(address!, walletProvider);
+
+      const fallbackPublicKey = keepData.fallbackRecipient
+        ? await getEncryptionPublicKey(keepData.fallbackRecipient, provider)
+        : null;
+      const creatorPublicKey = await getEncryptionPublicKey(address, provider);
 
       console.log("Step 5: exportSymmetricKey");
       const exportedKey = new Uint8Array(
@@ -195,6 +246,17 @@ export default function CreateKeep() {
           type: keepData.type,
         },
       };
+
+      // Check if Pinata is configured
+      if (!import.meta.env.VITE_PINATA_JWT) {
+        toast({
+          variant: "destructive",
+          title: "IPFS Storage Not Configured",
+          description:
+            "Please configure IPFS storage to create keeps. Contact support for assistance.",
+        });
+        return;
+      }
 
       const ipfsHash = await uploadToIPFS(ipfsPayload, {
         name: keepData.title,
@@ -553,13 +615,30 @@ export default function CreateKeep() {
           </Card>
 
           <div className="flex gap-3">
-            <Button
-              type="submit"
-              className="btn-keepr flex-1"
-              disabled={loading}
-            >
-              {loading ? "Creating..." : "Create Keep"}
-            </Button>
+            <TooltipProvider>
+              <Tooltip delayDuration={100}>
+                <TooltipTrigger asChild>
+                  <div className="flex-1">
+                    {" "}
+                    {/* Tooltips require a wrapper on disabled elements */}
+                    <Button
+                      type="submit"
+                      className="btn-keepr w-full"
+                      disabled={loading || !provider || !address}
+                    >
+                      {loading ? "Creating..." : "Create Keep"}
+                    </Button>
+                  </div>
+                </TooltipTrigger>
+                {!provider && address && (
+                  <TooltipContent>
+                    <p>
+                      Waiting for wallet provider... please wait or reconnect.
+                    </p>
+                  </TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
             <Button
               type="button"
               variant="outline"

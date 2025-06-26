@@ -224,9 +224,8 @@ export const listFiles = async (filters?: {
   }
 };
 
-export const isNetworkSupported = async (): Promise<boolean> => {
+export const isNetworkSupported = async (walletProvider: any): Promise<boolean> => {
   try {
-    const { walletProvider } = useWeb3ModalProvider();
     if (!walletProvider) return false;
     
     const chainId = await walletProvider.request({ method: 'eth_chainId' });
@@ -237,9 +236,8 @@ export const isNetworkSupported = async (): Promise<boolean> => {
   }
 };
 
-export const switchToSupportedNetwork = async (): Promise<void> => {
+export const switchToSupportedNetwork = async (walletProvider: any): Promise<void> => {
   try {
-    const { walletProvider } = useWeb3ModalProvider();
     if (!walletProvider) throw new Error("No provider available");
 
     await walletProvider.request({

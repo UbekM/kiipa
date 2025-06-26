@@ -22,6 +22,7 @@ import {
   Star,
   ArrowRight,
   Filter,
+  Info,
 } from "lucide-react";
 import { WalletConnection } from "@/components/wallet/WalletConnection";
 import { KeepCard, Keep } from "@/components/keepr/KeepCard";
@@ -38,6 +39,7 @@ export default function Dashboard() {
     loading,
     error,
     failedKeeps,
+    pinataAvailable,
     searchKeeps,
     refreshKeeps,
     retryKeep,
@@ -50,6 +52,9 @@ export default function Dashboard() {
   useEffect(() => {
     if (!isConnected) {
       navigate("/");
+    } else {
+      // Fetch keeps now that we are connected and on the dashboard
+      refreshKeeps();
     }
   }, [isConnected, navigate]);
 
@@ -62,14 +67,15 @@ export default function Dashboard() {
 
   // Calculate statistics
   const stats = {
-    total: keeps.length,
-    active: keeps.filter((k) => k.status === "active").length,
-    claimable: keeps.filter(
-      (k) =>
-        k.status === "unlocked" ||
-        (k.unlockTime < new Date() && k.status === "active"),
-    ).length,
-    claimed: keeps.filter((k) => k.status === "claimed").length,
+    total: keeps?.length || 0,
+    active: keeps?.filter((k) => k.status === "active").length || 0,
+    claimable:
+      keeps?.filter(
+        (k) =>
+          k.status === "unlocked" ||
+          (k.unlockTime < new Date() && k.status === "active"),
+      ).length || 0,
+    claimed: keeps?.filter((k) => k.status === "claimed").length || 0,
   };
 
   const handleKeepAction = async (action: string, keep: Keep) => {
@@ -102,11 +108,8 @@ export default function Dashboard() {
     return null; // Will redirect via useEffect
   }
 
-  if (loading) {
-    return <LoadingState />;
-  }
-
-  if (error) {
+  // Only show error screen for non-Pinata related errors
+  if (error && !error.includes("Pinata")) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
@@ -195,7 +198,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-forest-deep">
-                  {stats.total}
+                  {loading ? "..." : stats.total}
                 </p>
               </div>
 
@@ -209,7 +212,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-emerald-touch">
-                  {stats.active}
+                  {loading ? "..." : stats.active}
                 </p>
               </div>
 
@@ -224,9 +227,9 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <p className="text-2xl font-bold text-yellow-600">
-                    {stats.claimable}
+                    {loading ? "..." : stats.claimable}
                   </p>
-                  {stats.claimable > 0 && (
+                  {!loading && stats.claimable > 0 && (
                     <Badge
                       variant="destructive"
                       className="text-xs px-1.5 py-0.5 h-5"
@@ -247,7 +250,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-blue-600">
-                  {stats.claimed}
+                  {loading ? "..." : stats.claimed}
                 </p>
               </div>
             </div>
@@ -337,11 +340,90 @@ export default function Dashboard() {
               </div>
             )}
 
+            {/* Pinata Unavailable Warning */}
+            {!pinataAvailable && (
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
+                <div className="flex items-start gap-3">
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-blue-800 text-sm mb-1">
+                      IPFS Storage Unavailable
+                    </p>
+                    <p className="text-blue-700 text-xs mb-3">
+                      Your keeps are stored on IPFS but the storage service is
+                      currently unavailable. You can still create new keeps, and
+                      they will be stored once the service is restored.
+                    </p>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={refreshKeeps}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-3 py-1 h-7 border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        Retry Connection
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Keeps List */}
             <div className="space-y-4">
-              {filteredKeeps.length === 0 ? (
+              {loading ? (
                 <div className="text-center py-8">
-                  <p className="text-muted-foreground">No keeps found</p>
+                  <div className="space-y-3">
+                    <div className="w-16 h-16 bg-forest-deep/10 rounded-full flex items-center justify-center mx-auto animate-pulse">
+                      <Shield className="w-8 h-8 text-forest-deep" />
+                    </div>
+                    <div>
+                      <p className="text-forest-deep font-semibold mb-1">
+                        Loading Keeps...
+                      </p>
+                      <p className="text-muted-foreground text-sm">
+                        Fetching your keeps from IPFS storage
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : filteredKeeps.length === 0 ? (
+                <div className="text-center py-8">
+                  {!pinataAvailable ? (
+                    <div className="space-y-3">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                        <Shield className="w-8 h-8 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-forest-deep font-semibold mb-1">
+                          No Keeps Available
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          IPFS storage is currently unavailable. You can still
+                          create new keeps.
+                        </p>
+                      </div>
+                    </div>
+                  ) : keeps.length === 0 ? (
+                    <div className="space-y-3">
+                      <div className="w-16 h-16 bg-forest-deep/10 rounded-full flex items-center justify-center mx-auto">
+                        <Shield className="w-8 h-8 text-forest-deep" />
+                      </div>
+                      <div>
+                        <p className="text-forest-deep font-semibold mb-1">
+                          No Keeps Yet
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          Create your first keep to get started with secure
+                          digital inheritance.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No keeps match your search criteria
+                    </p>
+                  )}
                 </div>
               ) : (
                 filteredKeeps.map((keep) => (

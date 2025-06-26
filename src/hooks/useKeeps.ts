@@ -9,6 +9,7 @@ export function useKeeps() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [failedKeeps, setFailedKeeps] = useState<string[]>([]);
+  const [pinataAvailable, setPinataAvailable] = useState(true);
 
   const fetchKeeps = async () => {
     if (!address) return;
@@ -19,6 +20,15 @@ export function useKeeps() {
     
     try {
       console.log('Fetching keeps for address:', address);
+      
+      // Check if Pinata is configured
+      if (!import.meta.env.VITE_PINATA_JWT) {
+        console.warn('Pinata JWT not configured - skipping IPFS fetch');
+        setPinataAvailable(false);
+        setKeeps([]);
+        setLoading(false);
+        return;
+      }
       
       // Use the new listFiles function
       const allFiles = await listFiles();
@@ -93,7 +103,17 @@ export function useKeeps() {
       }
     } catch (err) {
       console.error('Error fetching keeps:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch keeps');
+      
+      // Don't set a global error - just log it and show empty state
+      // This allows the dashboard to still function
+      if (err instanceof Error && err.message.includes('Pinata')) {
+        console.warn('Pinata service unavailable - showing empty dashboard');
+        setPinataAvailable(false);
+        setKeeps([]);
+      } else {
+        // Only set error for non-Pinata related issues
+        setError(err instanceof Error ? err.message : 'Failed to fetch keeps');
+      }
     } finally {
       setLoading(false);
     }
@@ -141,10 +161,14 @@ export function useKeeps() {
   };
 
   useEffect(() => {
-    fetchKeeps();
+    // We will no longer fetch keeps automatically on mount.
+    // The Dashboard component will now trigger the fetch.
+    // fetchKeeps();
   }, [address]);
 
   const searchKeeps = (query: string, type?: string, status?: string) => {
+    if (!keeps) return [];
+    
     return keeps.filter(keep => {
       const matchesQuery = !query || 
         keep.title.toLowerCase().includes(query.toLowerCase()) ||
@@ -162,6 +186,7 @@ export function useKeeps() {
     loading,
     error,
     failedKeeps,
+    pinataAvailable,
     searchKeeps,
     refreshKeeps: fetchKeeps,
     retryKeep
