@@ -8,7 +8,15 @@
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "compile": "hardhat compile",
+    "deploy:local": "hardhat run scripts/deploy.js --network hardhat",
+    "deploy:sepolia": "hardhat run scripts/deploy.js --network liskSepolia",
+    "deploy:mainnet": "hardhat run scripts/deploy.js --network liskMainnet",
+    "verify:sepolia": "hardhat verify --network liskSepolia",
+    "verify:mainnet": "hardhat verify --network liskMainnet",
+    "test:contracts": "hardhat test",
+    "node": "hardhat node"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -76,13 +84,17 @@
     "zustand": "^5.0.5"
   },
   "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^6.0.0",
+    "@openzeppelin/contracts": "^5.3.0",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react-swc": "^3.5.0",
     "autoprefixer": "^10.4.20",
+    "dotenv": "^16.6.0",
     "globals": "^15.9.0",
+    "hardhat": "^2.25.0",
     "postcss": "^8.4.47",
     "prettier": "^3.5.3",
     "tailwindcss": "^3.4.11",

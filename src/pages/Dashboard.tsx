@@ -29,6 +29,7 @@ import { KeepCard, Keep } from "@/components/keepr/KeepCard";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { InstallPrompt } from "@/components/keepr/InstallPrompt";
 import { useKeeps } from "@/hooks/useKeeps";
+import { useKeeprContract, BlockchainKeep } from "@/hooks/useKeeprContract";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -43,9 +44,48 @@ export default function Dashboard() {
     refreshKeeps,
     retryKeep,
   } = useKeeps();
+  
+  // Smart contract integration
+  const {
+    getKeepsByCreator,
+    getKeepsByRecipient,
+    claimKeep,
+    activateFallback,
+    cancelKeep,
+    loading: contractLoading,
+    isContractDeployed,
+  } = useKeeprContract();
+  
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("active");
   const [showSearch, setShowSearch] = useState(false);
+  const [blockchainKeeps, setBlockchainKeeps] = useState<BlockchainKeep[]>([]);
+  const [blockchainLoading, setBlockchainLoading] = useState(false);
+
+  // Fetch blockchain keeps
+  const fetchBlockchainKeeps = async () => {
+    if (!address || !isContractDeployed) return;
+    
+    setBlockchainLoading(true);
+    try {
+      const [createdKeeps, recipientKeeps] = await Promise.all([
+        getKeepsByCreator(address),
+        getKeepsByRecipient(address),
+      ]);
+      
+      // Combine and deduplicate keeps
+      const allKeeps = [...createdKeeps, ...recipientKeeps];
+      const uniqueKeeps = allKeeps.filter((keep, index, self) => 
+        index === self.findIndex(k => k.id === keep.id)
+      );
+      
+      setBlockchainKeeps(uniqueKeeps);
+    } catch (error) {
+      console.error('Failed to fetch blockchain keeps:', error);
+    } finally {
+      setBlockchainLoading(false);
+    }
+  };
 
   // Redirect to onboarding if not connected
   useEffect(() => {
@@ -54,8 +94,9 @@ export default function Dashboard() {
     } else {
       // Fetch keeps now that we are connected and on the dashboard
       refreshKeeps();
+      fetchBlockchainKeeps();
     }
-  }, [isConnected, navigate]);
+  }, [isConnected, navigate, address, isContractDeployed]);
 
   // Filter keeps based on search and tab
   const filteredKeeps = searchKeeps(
@@ -64,17 +105,22 @@ export default function Dashboard() {
     selectedTab === "all" ? undefined : selectedTab,
   );
 
-  // Calculate statistics
+  // Calculate statistics including blockchain keeps
   const stats = {
-    total: keeps?.length || 0,
-    active: keeps?.filter((k) => k.status === "active").length || 0,
+    total: (keeps?.length || 0) + blockchainKeeps.length,
+    active: (keeps?.filter((k) => k.status === "active").length || 0) + 
+            blockchainKeeps.filter((k) => k.status === "Active").length,
     claimable:
-      keeps?.filter(
+      (keeps?.filter(
         (k) =>
           k.status === "unlocked" ||
           (k.unlockTime < new Date() && k.status === "active"),
-      ).length || 0,
-    claimed: keeps?.filter((k) => k.status === "claimed").length || 0,
+      ).length || 0) + 
+      blockchainKeeps.filter((k) => 
+        k.status === "Active" && k.unlockTime < Math.floor(Date.now() / 1000)
+      ).length,
+    claimed: (keeps?.filter((k) => k.status === "claimed").length || 0) + 
+             blockchainKeeps.filter((k) => k.status === "Claimed").length,
   };
 
   const handleKeepAction = async (action: string, keep: Keep) => {
@@ -83,8 +129,30 @@ export default function Dashboard() {
         navigate(`/keep/${keep.id}`);
         break;
       case "claim":
-        // Implement claim functionality
-        console.log("Claiming keep:", keep.id);
+        // Handle blockchain claim
+        if (keep.blockchainId) {
+          try {
+            await claimKeep(keep.blockchainId);
+            // Refresh blockchain keeps after claim
+            fetchBlockchainKeeps();
+          } catch (error) {
+            console.error('Failed to claim keep:', error);
+          }
+        } else {
+          console.log("Claiming keep:", keep.id);
+        }
+        break;
+      case "activateFallback":
+        // Handle fallback activation
+        if (keep.blockchainId) {
+          try {
+            await activateFallback(keep.blockchainId);
+            // Refresh blockchain keeps after activation
+            fetchBlockchainKeeps();
+          } catch (error) {
+            console.error('Failed to activate fallback:', error);
+          }
+        }
         break;
       case "reveal":
         // Implement reveal functionality for creators
@@ -95,8 +163,18 @@ export default function Dashboard() {
         navigate(`/keep/${keep.id}/edit`);
         break;
       case "cancel":
-        // Implement cancel functionality
-        console.log("Cancelling keep:", keep.id);
+        // Handle blockchain cancel
+        if (keep.blockchainId) {
+          try {
+            await cancelKeep(keep.blockchainId);
+            // Refresh blockchain keeps after cancel
+            fetchBlockchainKeeps();
+          } catch (error) {
+            console.error('Failed to cancel keep:', error);
+          }
+        } else {
+          console.log("Cancelling keep:", keep.id);
+        }
         break;
       default:
         console.log(`Unknown action: ${action}`);

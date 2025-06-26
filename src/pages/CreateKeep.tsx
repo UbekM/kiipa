@@ -45,6 +45,8 @@ import {
   useWeb3ModalProvider,
 } from "@web3modal/ethers/react";
 import { isNetworkSupported, switchToSupportedNetwork } from "@/lib/wallet";
+import { isValidEmail } from "@/lib/email";
+import { useKeeprContract } from "@/hooks/useKeeprContract";
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -66,6 +68,11 @@ export default function CreateKeep() {
   const { toast } = useToast();
   const { address } = useWeb3ModalAccount();
   const { walletProvider } = useWeb3ModalProvider();
+  const {
+    createKeep,
+    loading: contractLoading,
+    isContractDeployed,
+  } = useKeeprContract();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [keepData, setKeepData] = useState({
@@ -74,7 +81,9 @@ export default function CreateKeep() {
     type: "secret",
     content: "",
     recipient: "",
+    recipientEmail: "",
     fallbackRecipient: "",
+    fallbackEmail: "",
     unlockTime: "",
     file: null as File | null,
     fileName: "",
@@ -126,6 +135,17 @@ export default function CreateKeep() {
         );
       }
 
+      // Check if contract is deployed on current network
+      if (!isContractDeployed) {
+        toast({
+          variant: "destructive",
+          title: "Smart Contract Not Deployed",
+          description:
+            "The Keepr smart contract is not deployed on this network. Please switch to a supported network.",
+        });
+        return;
+      }
+
       // Check if user is on a supported network
       const isSupported = await isNetworkSupported(walletProvider);
       if (!isSupported) {
@@ -175,6 +195,18 @@ export default function CreateKeep() {
       ) {
         throw new Error(
           "Please enter a valid fallback recipient wallet address",
+        );
+      }
+
+      // Validate recipient email if provided
+      if (keepData.recipientEmail && !isValidEmail(keepData.recipientEmail)) {
+        throw new Error("Please enter a valid recipient email address");
+      }
+
+      // Validate fallback email if provided
+      if (keepData.fallbackEmail && !isValidEmail(keepData.fallbackEmail)) {
+        throw new Error(
+          "Please enter a valid fallback recipient email address",
         );
       }
 
@@ -262,13 +294,77 @@ export default function CreateKeep() {
         name: keepData.title,
         keyvalues: {
           recipient: keepData.recipient,
+          recipientEmail: keepData.recipientEmail,
           creator: address,
           ...(keepData.fallbackRecipient
-            ? { fallback: keepData.fallbackRecipient }
+            ? {
+                fallback: keepData.fallbackRecipient,
+                fallbackEmail: keepData.fallbackEmail,
+              }
             : {}),
           unlockTime: keepData.unlockTime,
         },
       });
+
+      console.log("Step 7: Create keep on blockchain");
+
+      // Convert keep type to contract enum
+      const keepTypeMap: { [key: string]: number } = {
+        secret: 0,
+        document: 1,
+        key: 2,
+        inheritance: 3,
+      };
+
+      // Create keep on blockchain
+      const unlockTimestamp = Math.floor(
+        new Date(keepData.unlockTime).getTime() / 1000,
+      );
+
+      const receipt = await createKeep(
+        keepData.recipient,
+        keepData.fallbackRecipient ||
+          "0x0000000000000000000000000000000000000000",
+        ipfsHash,
+        unlockTimestamp,
+        {
+          title: keepData.title,
+          description: keepData.description,
+          keepType: keepTypeMap[keepData.type] || 0,
+          recipientEmail: keepData.recipientEmail,
+          fallbackEmail: keepData.fallbackEmail,
+        },
+      );
+
+      // Schedule email notifications if emails are provided
+      if (keepData.recipientEmail || keepData.fallbackEmail) {
+        try {
+          const { scheduleKeepNotification } = await import("@/lib/email");
+          const notificationData = {
+            keepTitle: keepData.title,
+            keepDescription: keepData.description,
+            unlockTime: keepData.unlockTime,
+            creatorAddress: address,
+            recipientAddress: keepData.recipient,
+            recipientEmail: keepData.recipientEmail,
+            fallbackAddress: keepData.fallbackRecipient,
+            fallbackEmail: keepData.fallbackEmail,
+            appUrl: window.location.origin,
+          };
+
+          await scheduleKeepNotification(
+            notificationData,
+            new Date(keepData.unlockTime),
+          );
+          console.log(
+            "Email notifications scheduled for:",
+            new Date(keepData.unlockTime),
+          );
+        } catch (error) {
+          console.warn("Failed to schedule email notifications:", error);
+          // Don't fail the keep creation if email scheduling fails
+        }
+      }
 
       // Show fallback recipient warning if they haven't used the app
       let fallbackWarning = null;
@@ -277,8 +373,8 @@ export default function CreateKeep() {
       }
 
       toast({
-        title: "Keep Created",
-        description: "Your Keep was created and encrypted successfully",
+        title: "Keep Created Successfully",
+        description: `Your Keep was created and stored on the blockchain! Transaction: ${receipt.hash}`,
       });
 
       if (fallbackWarning) {
@@ -585,6 +681,23 @@ export default function CreateKeep() {
 
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-forest-deep">
+                    Recipient Email
+                  </label>
+                  <Input
+                    placeholder="Recipient's email"
+                    value={keepData.recipientEmail}
+                    onChange={(e) =>
+                      setKeepData({
+                        ...keepData,
+                        recipientEmail: e.target.value,
+                      })
+                    }
+                    className="bg-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-forest-deep">
                     Fallback Recipient (Optional)
                   </label>
                   <Input
@@ -594,6 +707,23 @@ export default function CreateKeep() {
                       setKeepData({
                         ...keepData,
                         fallbackRecipient: e.target.value,
+                      })
+                    }
+                    className="bg-white"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-forest-deep">
+                    Fallback Email (Optional)
+                  </label>
+                  <Input
+                    placeholder="Fallback recipient's email"
+                    value={keepData.fallbackEmail}
+                    onChange={(e) =>
+                      setKeepData({
+                        ...keepData,
+                        fallbackEmail: e.target.value,
                       })
                     }
                     className="bg-white"
