@@ -6,7 +6,7 @@ import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 export function useKeeps() {
   const { address } = useWeb3ModalAccount();
   const [keeps, setKeeps] = useState<Keep[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [failedKeeps, setFailedKeeps] = useState<string[]>([]);
   const [pinataAvailable, setPinataAvailable] = useState(true);

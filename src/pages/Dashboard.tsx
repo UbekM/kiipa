@@ -29,7 +29,6 @@ import { KeepCard, Keep } from "@/components/keepr/KeepCard";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { InstallPrompt } from "@/components/keepr/InstallPrompt";
 import { useKeeps } from "@/hooks/useKeeps";
-import { LoadingState } from "@/components/LoadingState";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -198,7 +197,11 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-forest-deep">
-                  {loading ? "..." : stats.total}
+                  {loading ? (
+                    <div className="h-8 bg-forest-deep/10 rounded animate-pulse w-12"></div>
+                  ) : (
+                    stats.total
+                  )}
                 </p>
               </div>
 
@@ -212,7 +215,11 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-emerald-touch">
-                  {loading ? "..." : stats.active}
+                  {loading ? (
+                    <div className="h-8 bg-emerald-touch/10 rounded animate-pulse w-12"></div>
+                  ) : (
+                    stats.active
+                  )}
                 </p>
               </div>
 
@@ -227,7 +234,11 @@ export default function Dashboard() {
                 </div>
                 <div className="flex items-center gap-2">
                   <p className="text-2xl font-bold text-yellow-600">
-                    {loading ? "..." : stats.claimable}
+                    {loading ? (
+                      <div className="h-8 bg-yellow-500/10 rounded animate-pulse w-12"></div>
+                    ) : (
+                      stats.claimable
+                    )}
                   </p>
                   {!loading && stats.claimable > 0 && (
                     <Badge
@@ -250,7 +261,11 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-blue-600">
-                  {loading ? "..." : stats.claimed}
+                  {loading ? (
+                    <div className="h-8 bg-blue-500/10 rounded animate-pulse w-12"></div>
+                  ) : (
+                    stats.claimed
+                  )}
                 </p>
               </div>
             </div>
@@ -372,19 +387,27 @@ export default function Dashboard() {
             {/* Keeps List */}
             <div className="space-y-4">
               {loading ? (
-                <div className="text-center py-8">
-                  <div className="space-y-3">
-                    <div className="w-16 h-16 bg-forest-deep/10 rounded-full flex items-center justify-center mx-auto animate-pulse">
-                      <Shield className="w-8 h-8 text-forest-deep" />
+                <div className="space-y-4">
+                  {/* Skeleton loading cards */}
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="card-native p-4 animate-pulse">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 bg-forest-deep/10 rounded-xl flex-shrink-0"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-forest-deep/10 rounded w-3/4"></div>
+                          <div className="h-3 bg-forest-deep/10 rounded w-1/2"></div>
+                          <div className="flex gap-2">
+                            <div className="h-6 bg-forest-deep/10 rounded w-16"></div>
+                            <div className="h-6 bg-forest-deep/10 rounded w-20"></div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-forest-deep font-semibold mb-1">
-                        Loading Keeps...
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        Fetching your keeps from IPFS storage
-                      </p>
-                    </div>
+                  ))}
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground text-sm">
+                      Loading your keeps...
+                    </p>
                   </div>
                 </div>
               ) : filteredKeeps.length === 0 ? (
