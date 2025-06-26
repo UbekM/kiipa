@@ -1,14 +1,31 @@
-import { defineConfig } from "vite";
+import { defineConfig, type ViteDevServer } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
 import path from "path";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    middlewareMode: false,
+    configureServer(server: ViteDevServer) {
+      server.middlewares.use((req, res, next) => {
+        res.setHeader("Permissions-Policy", "clipboard-write=(self)");
+        next();
+      });
+    },
   },
   plugins: [
+    nodePolyfills({
+      exclude: [],
+      globals: {
+        Buffer: true,
+        global: true,
+        process: true,
+      },
+      protocolImports: true,
+    }),
     react(),
     VitePWA({
       registerType: "autoUpdate",
@@ -61,7 +78,7 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name.endsWith(".png")) {
+          if (assetInfo.name && assetInfo.name.endsWith(".png")) {
             return "[name][extname]";
           }
           return "assets/[name]-[hash][extname]";

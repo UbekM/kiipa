@@ -172,7 +172,9 @@ export async function deriveEncryptionKey(address: string, walletProvider: any):
   const message = `Keepr Encryption Key for ${address}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
+  const hexMessage = '0x' + Buffer.from(data).toString('hex');
   
+
   try {
     // Sign the message with the wallet
     const signature = await walletProvider.request({
@@ -215,11 +217,13 @@ export async function deriveEncryptionKey(address: string, walletProvider: any):
     }
     throw new Error("Failed to derive encryption key. Please ensure your wallet is connected and try again.");
   }
+
 }
 
 // Deterministic RSA key generation using wallet signature
 export async function generateDeterministicKeyPair(address: string, walletProvider: any): Promise<CryptoKeyPair> {
   console.log("Generating deterministic key pair for address:", address);
+
   
   if (!walletProvider) {
     throw new Error("Wallet provider is required for key pair generation");
@@ -228,11 +232,12 @@ export async function generateDeterministicKeyPair(address: string, walletProvid
   if (!walletProvider.request) {
     throw new Error("Invalid wallet provider - request method not available");
   }
-  
+
   // Create a deterministic message based on the address
   const message = `Keepr RSA Key Pair for ${address}`;
   const encoder = new TextEncoder();
   const data = encoder.encode(message);
+
   
   try {
     // Sign the message with the wallet
@@ -271,6 +276,7 @@ export async function generateDeterministicKeyPair(address: string, walletProvid
     }
     throw new Error("Failed to generate encryption keys. Please ensure your wallet is connected and try again.");
   }
+
 }
 
 // Get or generate encryption keys for an address (without storing private keys)
@@ -429,4 +435,4 @@ export async function decryptKeep(
     console.error("Error decrypting keep:", error);
     throw new Error("Failed to decrypt keep content");
   }
-} 
+}
