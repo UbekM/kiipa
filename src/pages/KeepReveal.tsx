@@ -20,7 +20,10 @@ import {
   useWeb3ModalProvider,
 } from "@web3modal/ethers/react";
 import { downloadFromIPFS } from "@/lib/wallet";
-import { decryptKeep, getEncryptionPrivateKey } from "@/lib/encryption";
+import {
+  decryptKeep,
+  getEncryptionPrivateKeyForAddress,
+} from "@/lib/encryption";
 import { LoadingState } from "@/components/LoadingState";
 
 const getTypeIcon = (type: string) => {
@@ -116,7 +119,7 @@ export default function KeepReveal() {
 
       // Check if user has encryption keys
       try {
-        await getEncryptionPrivateKey(address, provider);
+        await getEncryptionPrivateKeyForAddress(address);
       } catch (keyError) {
         throw new Error(
           "You don't have encryption keys set up. Please create a keep first to generate your keys.",

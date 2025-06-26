@@ -17,8 +17,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { WalletConnection } from "@/components/wallet/WalletConnection";
-import { useWeb3ModalAccount, useWeb3ModalProvider } from "@web3modal/ethers/react";
-import { getEncryptionKeys } from "@/lib/encryption";
+import {
+  useWeb3ModalAccount,
+  useWeb3ModalProvider,
+} from "@web3modal/ethers/react";
+import { getEncryptionKeysForAddress } from "@/lib/encryption";
 import { useToast } from "@/components/ui/use-toast";
 
 const onboardingSteps = [
@@ -483,7 +486,7 @@ export function FallbackSetup() {
 
   const handleSetup = async () => {
     try {
-      await getEncryptionKeys(address!, walletProvider);
+      await getEncryptionKeysForAddress(address!);
       toast({
         title: "Encryption Key Created",
         description: "Your fallback encryption key is now set up!",
@@ -501,7 +504,8 @@ export function FallbackSetup() {
     <div>
       <h2>Setup as Fallback</h2>
       <p>
-        You have been added as a fallback recipient. Click below to set up your encryption key so you can access keeps if needed.
+        You have been added as a fallback recipient. Click below to set up your
+        encryption key so you can access keeps if needed.
       </p>
       <button onClick={handleSetup}>Setup Fallback Key</button>
     </div>

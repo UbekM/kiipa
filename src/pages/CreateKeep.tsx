@@ -35,9 +35,9 @@ import {
   generateSymmetricKey,
   symmetricEncrypt,
   exportSymmetricKey,
-  getEncryptionPublicKey,
+  getEncryptionPublicKeyForAddress,
   asymmetricEncrypt,
-  getEncryptionKeys,
+  getEncryptionKeysForAddress,
 } from "@/lib/encryption";
 import { uploadToIPFS } from "@/lib/wallet";
 import {
@@ -120,14 +120,14 @@ export default function CreateKeep() {
         throw new Error("Please connect your wallet first");
       }
 
-      if (!provider) {
+      if (!walletProvider) {
         throw new Error(
           "Wallet provider not available. Please reconnect your wallet.",
         );
       }
 
       // Check if user is on a supported network
-      const isSupported = await isNetworkSupported(provider);
+      const isSupported = await isNetworkSupported(walletProvider);
       if (!isSupported) {
         toast({
           variant: "destructive",
@@ -136,7 +136,7 @@ export default function CreateKeep() {
             "Please switch to Lisk Mainnet or Sepolia to create keeps.",
         });
         try {
-          await switchToSupportedNetwork(provider);
+          await switchToSupportedNetwork(walletProvider);
           toast({
             title: "Network Switched",
             description:
@@ -157,7 +157,6 @@ export default function CreateKeep() {
       if (!keepData.content && !keepData.file) {
         throw new Error("Please provide either text content or upload a file");
       }
-
 
       console.log("Step 0: getEncryptionKeys");
 
@@ -180,8 +179,7 @@ export default function CreateKeep() {
       }
 
       // 0. Ensure creator has encryption keys
-      await getEncryptionKeys(address, provider);
-
+      await getEncryptionKeysForAddress(address);
 
       console.log("Step 1: Prepare content");
       let contentBuffer: ArrayBuffer;
@@ -201,24 +199,27 @@ export default function CreateKeep() {
       );
 
       console.log("Step 4: getEncryptionPublicKey (owner)");
-      const ownerPublicKey = await getEncryptionPublicKey(
+      const ownerPublicKey = await getEncryptionPublicKeyForAddress(
         keepData.recipient,
-        keepData.recipient === address ? walletProvider : undefined
       );
 
-      console.log("Step 4: getEncryptionPublicKey (creator)");
-
+      console.log("Step 4: getEncryptionPublicKey (fallback)");
       const fallbackPublicKey = keepData.fallbackRecipient
-        ? await getEncryptionPublicKey(keepData.fallbackRecipient, provider)
+        ? await getEncryptionPublicKeyForAddress(keepData.fallbackRecipient)
         : null;
-      const creatorPublicKey = await getEncryptionPublicKey(address, provider);
+
+      console.log("Step 4: getEncryptionPublicKey (creator)");
+      const creatorPublicKey = await getEncryptionPublicKeyForAddress(address);
 
       console.log("Step 5: exportSymmetricKey");
       const exportedKey = new Uint8Array(
         await exportSymmetricKey(symmetricKey),
       );
       console.log("Step 5: asymmetricEncrypt (owner)");
-      const encryptedOwnerKey = await asymmetricEncrypt(exportedKey, ownerPublicKey);
+      const encryptedOwnerKey = await asymmetricEncrypt(
+        exportedKey,
+        ownerPublicKey,
+      );
       console.log("Step 5: asymmetricEncrypt (fallback)");
       const encryptedFallbackKey = fallbackPublicKey
         ? await asymmetricEncrypt(exportedKey, fallbackPublicKey)
@@ -237,13 +238,12 @@ export default function CreateKeep() {
         encryptedFallbackKey: encryptedFallbackKey
           ? Array.from(new Uint8Array(encryptedFallbackKey))
           : undefined,
-        encryptedCreatorKey: Array.from(
-          new Uint8Array(encryptedCreatorKey),
-        ),
+        encryptedCreatorKey: Array.from(new Uint8Array(encryptedCreatorKey)),
         meta: {
           title: keepData.title,
           description: keepData.description,
           type: keepData.type,
+          unlockTime: keepData.unlockTime,
         },
       };
 
@@ -266,21 +266,29 @@ export default function CreateKeep() {
           ...(keepData.fallbackRecipient
             ? { fallback: keepData.fallbackRecipient }
             : {}),
+          unlockTime: keepData.unlockTime,
         },
       });
 
-      if (fallbackWarning) {
-        toast({
-          variant: "default",
-          title: "Fallback Recipient Not Ready",
-          description: fallbackWarning,
-        });
+      // Show fallback recipient warning if they haven't used the app
+      let fallbackWarning = null;
+      if (keepData.fallbackRecipient) {
+        fallbackWarning = `Note: Your fallback recipient (${keepData.fallbackRecipient.slice(0, 6)}...${keepData.fallbackRecipient.slice(-4)}) will need to visit Keepr and connect their wallet to access this keep. They will receive an email notification when the keep becomes available.`;
       }
 
       toast({
         title: "Keep Created",
         description: "Your Keep was created and encrypted successfully",
       });
+
+      if (fallbackWarning) {
+        toast({
+          variant: "default",
+          title: "Fallback Recipient Setup",
+          description: fallbackWarning,
+        });
+      }
+
       navigate("/dashboard");
     } catch (error) {
       console.error("CreateKeep error:", error);
@@ -624,13 +632,13 @@ export default function CreateKeep() {
                     <Button
                       type="submit"
                       className="btn-keepr w-full"
-                      disabled={loading || !provider || !address}
+                      disabled={loading || !walletProvider || !address}
                     >
                       {loading ? "Creating..." : "Create Keep"}
                     </Button>
                   </div>
                 </TooltipTrigger>
-                {!provider && address && (
+                {!walletProvider && address && (
                   <TooltipContent>
                     <p>
                       Waiting for wallet provider... please wait or reconnect.
