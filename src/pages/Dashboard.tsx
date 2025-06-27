@@ -106,12 +106,50 @@ export default function Dashboard() {
     }
   }, [contractService, address, isContractDeployed, fetchBlockchainKeeps]);
 
+  // Convert blockchain keeps to Keep format
+  const convertBlockchainKeeps = (
+    blockchainKeeps: BlockchainKeep[],
+  ): Keep[] => {
+    return blockchainKeeps.map((blockchainKeep) => ({
+      id: `blockchain-${blockchainKeep.id}`,
+      title: blockchainKeep.title || "Blockchain Keep",
+      description: blockchainKeep.description || "",
+      recipient: blockchainKeep.recipient,
+      fallback: blockchainKeep.fallbackRecipient,
+      creator: blockchainKeep.creator,
+      unlockTime: new Date(blockchainKeep.unlockTime * 1000), // Convert Unix timestamp to Date
+      createdAt: new Date(blockchainKeep.createdAt * 1000), // Convert Unix timestamp to Date
+      status: blockchainKeep.status.toLowerCase() as Keep["status"],
+      ipfsHash: blockchainKeep.ipfsHash,
+      keepType: blockchainKeep.keepType.toLowerCase() as Keep["keepType"],
+      blockchainId: blockchainKeep.id, // Add blockchain ID for reference
+      ipfsError: false,
+    }));
+  };
+
+  // Combine IPFS and blockchain keeps
+  const allKeeps = [
+    ...(keeps || []),
+    ...convertBlockchainKeeps(blockchainKeeps),
+  ];
+
   // Filter keeps based on search and tab
-  const filteredKeeps = searchKeeps(
-    searchQuery,
-    undefined,
-    selectedTab === "all" ? undefined : selectedTab,
-  );
+  const filteredKeeps = allKeeps.filter((keep) => {
+    const matchesQuery =
+      !searchQuery ||
+      keep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      keep.description?.toLowerCase().includes(searchQuery.toLowerCase());
+
+    const matchesStatus =
+      selectedTab === "all" ||
+      (selectedTab === "active" && keep.status === "active") ||
+      (selectedTab === "claimable" &&
+        (keep.status === "unlocked" ||
+          (keep.unlockTime < new Date() && keep.status === "active"))) ||
+      (selectedTab === "claimed" && keep.status === "claimed");
+
+    return matchesQuery && matchesStatus;
+  });
 
   // Calculate statistics including blockchain keeps
   const stats = {

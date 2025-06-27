@@ -37,6 +37,7 @@ export interface Keep {
   keepType: "secret" | "document" | "key" | "inheritance";
   ipfsError?: boolean;
   errorMessage?: string;
+  blockchainId?: number;
 }
 
 interface KeepCardProps {
