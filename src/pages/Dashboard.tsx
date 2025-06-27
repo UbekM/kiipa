@@ -345,8 +345,8 @@ export default function Dashboard() {
             </div>
 
             {/* Welcome message */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-forest-deep mb-1">
+            <div className="mb-1">
+              <h2 className="text-xl font-bold text-forest-deep mb-1">
                 {settingsLoading ? (
                   <span className="flex items-center gap-2">
                     Welcome back! 👋

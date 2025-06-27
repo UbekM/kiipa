@@ -128,7 +128,7 @@ export function WalletConnection() {
   const isCorrectNetwork = chainId ? isLiskNetwork(chainId) : false;
 
   return (
-    <div className="w-11/12 mx-auto space-y-2 mt-1">
+    <div className="w-11/12 mx-auto space-y-1 mt-1">
       {/* Network Status Alert */}
       {!isCorrectNetwork && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-2xl">
@@ -323,7 +323,7 @@ export function WalletConnection() {
 
         {/* Network Badge */}
         {chainId && (
-          <div className="mt-3 flex justify-center">
+          <div className="mt-1 flex justify-center">
             <Badge
               className={`${
                 isCorrectNetwork
