@@ -32,6 +32,18 @@ import { useKeeps } from "@/hooks/useKeeps";
 import { useKeeprContract, BlockchainKeep } from "@/hooks/useKeeprContract";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { KEEP_STATUS, KEEP_TYPE } from "@/lib/contracts";
+import {
+  useWeb3Modal,
+  useWeb3ModalProvider,
+} from "@web3modal/ethers/react";
+import {
+  Wallet,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Power,
+  RefreshCw,
+} from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -65,6 +77,7 @@ export default function Dashboard() {
   const [showSearch, setShowSearch] = useState(false);
   const [blockchainKeeps, setBlockchainKeeps] = useState<BlockchainKeep[]>([]);
   const [blockchainLoading, setBlockchainLoading] = useState(false);
+  const { open } = useWeb3Modal();
 
   // Fetch blockchain keeps
   const fetchBlockchainKeeps = async () => {
@@ -290,14 +303,14 @@ export default function Dashboard() {
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-forest-deep">Keepr</h1>
+                  <h1 className="text-xl font-bold text-forest-deep">Kiipa</h1>
                   <p className="text-xs text-muted-foreground">
                     Digital Legacy Manager
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -317,6 +330,12 @@ export default function Dashboard() {
                     <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
                 </Button>
+                <Button
+                  onClick={() => open()}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+                >
+                  <Power className="w-4 h-4" /> Disconnect
+                </Button>
               </div>
             </div>
 
@@ -326,7 +345,7 @@ export default function Dashboard() {
             </div>
 
             {/* Welcome message */}
-            <div className="mb-6 mt-12">
+            <div className="mb-6">
               <h2 className="text-2xl font-bold text-forest-deep mb-1">
                 {settingsLoading ? (
                   <span className="flex items-center gap-2">

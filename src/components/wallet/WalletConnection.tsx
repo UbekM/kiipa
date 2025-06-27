@@ -128,7 +128,7 @@ export function WalletConnection() {
   const isCorrectNetwork = chainId ? isLiskNetwork(chainId) : false;
 
   return (
-    <div className="w-11/12 mx-auto space-y-3 mt-2">
+    <div className="w-11/12 mx-auto space-y-2 mt-1">
       {/* Network Status Alert */}
       {!isCorrectNetwork && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-2xl">
@@ -155,7 +155,7 @@ export function WalletConnection() {
 
       {/* Connected Wallet Card */}
       <div className="card-native p-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-touch/10 rounded-xl flex items-center justify-center">
               <Wallet className="w-5 h-5 text-emerald-touch" />
@@ -190,7 +190,7 @@ export function WalletConnection() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <div className="p-3 space-y-3">
+              <div className="p-3 space-y-1">
                 {/* Address */}
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Address:</p>
@@ -336,6 +336,7 @@ export function WalletConnection() {
           </div>
         )}
       </div>
+      
     </div>
   );
 }
