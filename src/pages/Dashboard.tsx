@@ -30,11 +30,13 @@ import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { InstallPrompt } from "@/components/keepr/InstallPrompt";
 import { useKeeps } from "@/hooks/useKeeps";
 import { useKeeprContract, BlockchainKeep } from "@/hooks/useKeeprContract";
+import { useUserSettings } from "@/hooks/useUserSettings";
 import { KEEP_STATUS, KEEP_TYPE } from "@/lib/contracts";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { isConnected, address } = useWeb3ModalAccount();
+  const { getDisplayName, loading: settingsLoading } = useUserSettings();
   const {
     keeps,
     loading,
@@ -326,7 +328,14 @@ export default function Dashboard() {
             {/* Welcome message */}
             <div className="mb-6">
               <h2 className="text-2xl font-bold text-forest-deep mb-1">
-                Welcome back! 👋
+                {settingsLoading ? (
+                  <span className="flex items-center gap-2">
+                    Welcome back! 👋
+                    <div className="w-4 h-4 border-2 border-forest-deep/20 border-t-forest-deep rounded-full animate-spin" />
+                  </span>
+                ) : (
+                  `Welcome back, ${getDisplayName()}! 👋`
+                )}
               </h2>
               <p className="text-muted-foreground text-sm">
                 Manage your Keeps and secure your digital legacy
