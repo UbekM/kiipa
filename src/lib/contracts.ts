@@ -132,10 +132,14 @@ export class KeeprContractService {
       ipfsHash,
       unlockTime,
       {
-        ...metadata,
-        unlockTime
+        title: metadata.title,
+        description: metadata.description,
+        keepType: metadata.keepType,
+        unlockTime: unlockTime,
+        recipientEmail: metadata.recipientEmail,
+        fallbackEmail: metadata.fallbackEmail
       },
-      { value: platformFee }
+      { value: platformFee.toString() }
     );
   }
 
