@@ -321,12 +321,12 @@ export default function Dashboard() {
             </div>
 
             {/* Wallet connection */}
-            <div className="mb-4">
+            <div className="mb-4 w-full">
               <WalletConnection />
             </div>
 
             {/* Welcome message */}
-            <div className="mb-6">
+            <div className="mb-6 mt-12">
               <h2 className="text-2xl font-bold text-forest-deep mb-1">
                 {settingsLoading ? (
                   <span className="flex items-center gap-2">
@@ -358,7 +358,7 @@ export default function Dashboard() {
                     Total Keeps
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-forest-deep">
+                <div className="text-3xl font-bold text-forest-deep">
                   {loading ? (
                     <div className="h-8 bg-forest-deep/10 rounded animate-pulse w-12"></div>
                   ) : (
@@ -376,7 +376,7 @@ export default function Dashboard() {
                     Active
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-emerald-touch">
+                <div className="text-3xl font-bold text-emerald-touch">
                   {loading ? (
                     <div className="h-8 bg-emerald-touch/10 rounded animate-pulse w-12"></div>
                   ) : (
@@ -395,7 +395,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-2xl font-bold text-yellow-600">
+                  <div className="text-3xl font-bold text-yellow-600">
                     {loading ? (
                       <div className="h-8 bg-yellow-500/10 rounded animate-pulse w-12"></div>
                     ) : (
@@ -422,7 +422,7 @@ export default function Dashboard() {
                     Claimed
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-blue-600">
                   {loading ? (
                     <div className="h-8 bg-blue-500/10 rounded animate-pulse w-12"></div>
                   ) : (

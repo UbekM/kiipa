@@ -383,12 +383,12 @@ export default function KeepDetails() {
                 </h1>
               </div>
             </div>
-            <WalletConnection />
+            {/* <WalletConnection /> */}
           </div>
         </div>
       </header>
 
-      <main className="mobile-padding mobile-section">
+      <main className="mobile-padding mobile-section mt-8">
         <div className="max-w-2xl mx-auto space-y-6">
           <Tabs value={selectedTab} onValueChange={setSelectedTab}>
             <TabsList className="grid w-full grid-cols-2">
@@ -397,7 +397,7 @@ export default function KeepDetails() {
             </TabsList>
 
             <TabsContent value="details" className="space-y-6">
-              <Card className="border-forest-deep/10">
+              <Card className="border-forest-deep/10 mt-8">
                 <CardHeader>
                   <CardTitle className="text-forest-deep flex items-center gap-2">
                     <Shield className="w-5 h-5" />
@@ -415,17 +415,17 @@ export default function KeepDetails() {
                       </p>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-muted-foreground">
+                      <label className="text-sm font-medium text-forest-deep">
                         Type
                       </label>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 text-forest-deep">
                         {React.createElement(
                           getTypeIcon(keepData.meta?.type || "secret"),
                           {
                             className: "w-4 h-4 text-forest-deep",
                           },
                         )}
-                        <Badge variant="outline" className="capitalize">
+                        <Badge variant="outline" className="capitalize text-forest-deep">
                           {keepData.meta?.type || "secret"}
                         </Badge>
                       </div>

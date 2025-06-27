@@ -661,13 +661,14 @@ export default function CreateKeep() {
                 </h1>
               </div>
             </div>
-            <WalletConnection />
           </div>
         </div>
       </header>
+      <WalletConnection />
+
 
       {/* Balance and Network Status */}
-      {address && (
+      {/* {address && (
         <div className="mobile-padding mb-6">
           <Card className="border-forest-deep/10">
             <CardContent className="p-4">
@@ -693,7 +694,7 @@ export default function CreateKeep() {
                   <p className="text-sm font-medium text-forest-deep">
                     Balance
                   </p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-end gap-2">
                     <p className="text-xs text-muted-foreground">
                       {balanceLoading ? (
                         <span className="animate-pulse">Loading...</span>
@@ -720,7 +721,7 @@ export default function CreateKeep() {
             </CardContent>
           </Card>
         </div>
-      )}
+      )} */}
 
       <main className="mobile-padding mobile-section mt-14">
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">

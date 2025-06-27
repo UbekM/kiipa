@@ -5,8 +5,8 @@ import {
 } from "@web3modal/ethers/react";
 import { BrowserProvider } from "ethers";
 import { useEffect, useState } from "react";
-import { Button } from "@/hooks/components/ui/button";
-import { Badge } from "@/hooks/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   formatAddress,
   formatBalance,
@@ -30,7 +30,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/hooks/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu";
 
 export function WalletConnection() {
   const { open } = useWeb3Modal();
@@ -105,7 +105,7 @@ export function WalletConnection() {
   const isCorrectNetwork = chainId ? isLiskNetwork(chainId) : false;
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full space-y-3 ">
       {/* Network Status Alert */}
       {!isCorrectNetwork && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-2xl">
@@ -151,11 +151,11 @@ export function WalletConnection() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="touch-target hover:bg-forest-deep/5 rounded-xl p-2"
+                className="touch-target bg-forest-deep hover:bg-forest-deep/90 rounded-xl p-2"
               >
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-4 h-4 text-forest-deep" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
