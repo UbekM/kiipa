@@ -64,9 +64,32 @@ export function WalletConnection() {
   const copyAddress = async () => {
     if (address) {
       try {
-        await navigator.clipboard.writeText(address);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
+        // Try modern clipboard API first
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(address);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } else {
+          // Fallback for older browsers or non-secure contexts
+          const textArea = document.createElement("textarea");
+          textArea.value = address;
+          textArea.style.position = "fixed";
+          textArea.style.left = "-999999px";
+          textArea.style.top = "-999999px";
+          document.body.appendChild(textArea);
+          textArea.focus();
+          textArea.select();
+
+          try {
+            document.execCommand("copy");
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          } catch (error) {
+            console.error("Fallback copy failed:", error);
+          }
+
+          document.body.removeChild(textArea);
+        }
       } catch (error) {
         console.error("Failed to copy address:", error);
       }
