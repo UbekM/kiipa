@@ -44,7 +44,7 @@ export default function Dashboard() {
     refreshKeeps,
     retryKeep,
   } = useKeeps();
-  
+
   // Smart contract integration
   const {
     getKeepsByCreator,
@@ -54,8 +54,9 @@ export default function Dashboard() {
     cancelKeep,
     loading: contractLoading,
     isContractDeployed,
+    contractService,
   } = useKeeprContract();
-  
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("active");
   const [showSearch, setShowSearch] = useState(false);
@@ -64,24 +65,25 @@ export default function Dashboard() {
 
   // Fetch blockchain keeps
   const fetchBlockchainKeeps = async () => {
-    if (!address || !isContractDeployed) return;
-    
+    if (!address || !isContractDeployed || !contractService) return;
+
     setBlockchainLoading(true);
     try {
       const [createdKeeps, recipientKeeps] = await Promise.all([
         getKeepsByCreator(address),
         getKeepsByRecipient(address),
       ]);
-      
+
       // Combine and deduplicate keeps
       const allKeeps = [...createdKeeps, ...recipientKeeps];
-      const uniqueKeeps = allKeeps.filter((keep, index, self) => 
-        index === self.findIndex(k => k.id === keep.id)
+      const uniqueKeeps = allKeeps.filter(
+        (keep, index, self) =>
+          index === self.findIndex((k) => k.id === keep.id),
       );
-      
+
       setBlockchainKeeps(uniqueKeeps);
     } catch (error) {
-      console.error('Failed to fetch blockchain keeps:', error);
+      console.error("Failed to fetch blockchain keeps:", error);
     } finally {
       setBlockchainLoading(false);
     }
@@ -94,9 +96,15 @@ export default function Dashboard() {
     } else {
       // Fetch keeps now that we are connected and on the dashboard
       refreshKeeps();
+    }
+  }, [isConnected, navigate]);
+
+  // Fetch blockchain keeps when contract service is ready
+  useEffect(() => {
+    if (contractService && address && isContractDeployed) {
       fetchBlockchainKeeps();
     }
-  }, [isConnected, navigate, address, isContractDeployed]);
+  }, [contractService, address, isContractDeployed, fetchBlockchainKeeps]);
 
   // Filter keeps based on search and tab
   const filteredKeeps = searchKeeps(
@@ -108,19 +116,22 @@ export default function Dashboard() {
   // Calculate statistics including blockchain keeps
   const stats = {
     total: (keeps?.length || 0) + blockchainKeeps.length,
-    active: (keeps?.filter((k) => k.status === "active").length || 0) + 
-            blockchainKeeps.filter((k) => k.status === "Active").length,
+    active:
+      (keeps?.filter((k) => k.status === "active").length || 0) +
+      blockchainKeeps.filter((k) => k.status === "Active").length,
     claimable:
       (keeps?.filter(
         (k) =>
           k.status === "unlocked" ||
           (k.unlockTime < new Date() && k.status === "active"),
-      ).length || 0) + 
-      blockchainKeeps.filter((k) => 
-        k.status === "Active" && k.unlockTime < Math.floor(Date.now() / 1000)
+      ).length || 0) +
+      blockchainKeeps.filter(
+        (k) =>
+          k.status === "Active" && k.unlockTime < Math.floor(Date.now() / 1000),
       ).length,
-    claimed: (keeps?.filter((k) => k.status === "claimed").length || 0) + 
-             blockchainKeeps.filter((k) => k.status === "Claimed").length,
+    claimed:
+      (keeps?.filter((k) => k.status === "claimed").length || 0) +
+      blockchainKeeps.filter((k) => k.status === "Claimed").length,
   };
 
   const handleKeepAction = async (action: string, keep: Keep) => {
@@ -136,7 +147,7 @@ export default function Dashboard() {
             // Refresh blockchain keeps after claim
             fetchBlockchainKeeps();
           } catch (error) {
-            console.error('Failed to claim keep:', error);
+            console.error("Failed to claim keep:", error);
           }
         } else {
           console.log("Claiming keep:", keep.id);
@@ -150,7 +161,7 @@ export default function Dashboard() {
             // Refresh blockchain keeps after activation
             fetchBlockchainKeeps();
           } catch (error) {
-            console.error('Failed to activate fallback:', error);
+            console.error("Failed to activate fallback:", error);
           }
         }
         break;
@@ -170,7 +181,7 @@ export default function Dashboard() {
             // Refresh blockchain keeps after cancel
             fetchBlockchainKeeps();
           } catch (error) {
-            console.error('Failed to cancel keep:', error);
+            console.error("Failed to cancel keep:", error);
           }
         } else {
           console.log("Cancelling keep:", keep.id);
@@ -274,13 +285,13 @@ export default function Dashboard() {
                     Total Keeps
                   </span>
                 </div>
-                <p className="text-2xl font-bold text-forest-deep">
+                <div className="text-2xl font-bold text-forest-deep">
                   {loading ? (
                     <div className="h-8 bg-forest-deep/10 rounded animate-pulse w-12"></div>
                   ) : (
                     stats.total
                   )}
-                </p>
+                </div>
               </div>
 
               <div className="card-native p-4">
@@ -292,13 +303,13 @@ export default function Dashboard() {
                     Active
                   </span>
                 </div>
-                <p className="text-2xl font-bold text-emerald-touch">
+                <div className="text-2xl font-bold text-emerald-touch">
                   {loading ? (
                     <div className="h-8 bg-emerald-touch/10 rounded animate-pulse w-12"></div>
                   ) : (
                     stats.active
                   )}
-                </p>
+                </div>
               </div>
 
               <div className="card-native p-4">
@@ -311,13 +322,13 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <p className="text-2xl font-bold text-yellow-600">
+                  <div className="text-2xl font-bold text-yellow-600">
                     {loading ? (
                       <div className="h-8 bg-yellow-500/10 rounded animate-pulse w-12"></div>
                     ) : (
                       stats.claimable
                     )}
-                  </p>
+                  </div>
                   {!loading && stats.claimable > 0 && (
                     <Badge
                       variant="destructive"
@@ -338,13 +349,13 @@ export default function Dashboard() {
                     Claimed
                   </span>
                 </div>
-                <p className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-blue-600">
                   {loading ? (
                     <div className="h-8 bg-blue-500/10 rounded animate-pulse w-12"></div>
                   ) : (
                     stats.claimed
                   )}
-                </p>
+                </div>
               </div>
             </div>
 
