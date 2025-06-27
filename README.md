@@ -21,6 +21,38 @@ Keepr is a revolutionary decentralized inheritance protocol that enables secure,
 - **⏰ Time-Based Access** - Scheduled inheritance with unlock dates
 - **🛡️ Trustless Security** - No central authority or trusted third parties
 
+## 🏗️ Architecture
+
+### Tech Stack
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI Framework**: Tailwind CSS + shadcn/ui
+- **Blockchain**: Lisk Network + WalletConnect
+- **Storage**: IPFS (Pinata)
+- **Encryption**: Web Crypto API (AES-GCM + RSA-OAEP)
+- **State Management**: React Hooks + Context
+- **Smart Contracts**: Solidity 0.8.20 + OpenZeppelin v5
+
+### Security Features
+- **Client-Side Encryption**: All encryption/decryption happens in the browser
+- **Deterministic Keys**: Consistent key generation from wallet addresses
+- **Multiple Access Paths**: Primary, fallback, and creator access
+- **Time-Based Control**: Scheduled inheritance with unlock dates
+- **Audit Trail**: Immutable storage with access tracking
+
+## 📍 Deployment Status
+
+### Smart Contract Deployments
+
+| Network | Chain ID | Contract Address | Status |
+|---------|----------|------------------|--------|
+| **Lisk Sepolia** | 4202 | `0x7a1F22106a45348E510B84dE933D5BDA0842aF09` | ✅ **Deployed** |
+| Lisk Mainnet | 1135 | `0x0000000000000000000000000000000000000000` | ⏳ Pending |
+| Hardhat Local | 1337 | `0x5FbDB2315678afecb367f032d93F642f64180aa3` | 🧪 Development |
+
+### Frontend Deployment
+- **Development**: `http://localhost:8081`
+- **Production**: Coming soon
+
 ## 🔐 Revolutionary Encryption System
 
 ### Universal Recipient Access
@@ -37,23 +69,6 @@ Symmetric Key → RSA-OAEP (Asymmetric) → Encrypted Keys for each recipient
 - No pre-registration or key exchange required
 - Consistent key generation across devices and sessions
 - Works with any Ethereum-compatible wallet
-
-## 🏗️ Architecture
-
-### Tech Stack
-- **Frontend**: React 18 + TypeScript + Vite
-- **UI Framework**: Tailwind CSS + shadcn/ui
-- **Blockchain**: Ethereum/Lisk + WalletConnect
-- **Storage**: IPFS (Pinata)
-- **Encryption**: Web Crypto API (AES-GCM + RSA-OAEP)
-- **State Management**: React Hooks + Context
-
-### Security Features
-- **Client-Side Encryption**: All encryption/decryption happens in the browser
-- **Deterministic Keys**: Consistent key generation from wallet addresses
-- **Multiple Access Paths**: Primary, fallback, and creator access
-- **Time-Based Control**: Scheduled inheritance with unlock dates
-- **Audit Trail**: Immutable storage with access tracking
 
 ## 🚀 Getting Started
 
@@ -81,6 +96,8 @@ Symmetric Key → RSA-OAEP (Asymmetric) → Encrypted Keys for each recipient
    ```env
    VITE_WALLET_CONNECT_PROJECT_ID=your_walletconnect_project_id
    VITE_PINATA_JWT=your_pinata_jwt_token
+   LISK_SEPOLIA_RPC_URL=https://rpc.sepolia-api.lisk.com
+   PRIVATE_KEY=your_private_key_for_deployment
    ```
 
 4. **Start development server**
@@ -97,6 +114,8 @@ Symmetric Key → RSA-OAEP (Asymmetric) → Encrypted Keys for each recipient
 |----------|-------------|----------|
 | `VITE_WALLET_CONNECT_PROJECT_ID` | WalletConnect Cloud Project ID | Yes |
 | `VITE_PINATA_JWT` | Pinata IPFS JWT token | Yes |
+| `LISK_SEPOLIA_RPC_URL` | Lisk Sepolia RPC endpoint | For deployment |
+| `PRIVATE_KEY` | Private key for contract deployment | For deployment |
 
 ## 📖 Usage
 
@@ -153,11 +172,15 @@ src/
 │   └── keepr/          # Keep-specific components
 ├── hooks/              # Custom React hooks
 ├── lib/                # Utility libraries
+│   ├── contracts.ts    # Smart contract integration
 │   ├── encryption.ts   # Encryption utilities
 │   ├── wallet.ts       # Wallet utilities
 │   └── utils.ts        # General utilities
 ├── pages/              # Page components
 └── main.tsx           # Application entry point
+contracts/
+├── Keepr.sol          # Main smart contract
+└── ...                # Other contract files
 ```
 
 ### Available Scripts
@@ -168,10 +191,30 @@ pnpm dev              # Start development server
 pnpm build            # Build for production
 pnpm preview          # Preview production build
 
+# Smart Contracts
+npx hardhat compile   # Compile contracts
+npx hardhat test      # Run tests
+npx hardhat node      # Start local blockchain
+npx hardhat run scripts/deploy.cjs --network liskSepolia  # Deploy to Lisk Sepolia
+
 # Code Quality
 pnpm lint             # Run ESLint
 pnpm format           # Format code with Prettier
 ```
+
+### Smart Contract Development
+
+The Keepr smart contract is built with:
+- **Solidity 0.8.20** - Latest stable version
+- **OpenZeppelin v5** - Security and standard implementations
+- **Hardhat** - Development and deployment framework
+
+Key contract features:
+- **ReentrancyGuard** - Protection against reentrancy attacks
+- **Pausable** - Emergency pause functionality
+- **Ownable** - Access control for admin functions
+- **Time-based inheritance** - Scheduled unlocking mechanism
+- **Multi-recipient support** - Primary and fallback recipients
 
 ### Contributing
 
@@ -194,6 +237,7 @@ pnpm format           # Format code with Prettier
 - All encryption/decryption happens client-side
 - No plaintext content ever leaves the user's device
 - IPFS provides immutable storage with audit trail
+- Smart contracts use OpenZeppelin security patterns
 
 ## 📄 License
 

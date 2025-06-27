@@ -116,7 +116,11 @@ async function handleAPIRequest(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(API_CACHE);
-      if (isHttpRequest(request)) cache.put(request, response.clone());
+      if (isHttpRequest(request)) {
+        // Clone the response before caching
+        const responseClone = response.clone();
+        cache.put(request, responseClone);
+      }
     }
     return response;
   } catch (error) {
@@ -150,7 +154,11 @@ async function handleStaticAssets(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(RUNTIME_CACHE);
-      if (isHttpRequest(request)) cache.put(request, response.clone());
+      if (isHttpRequest(request)) {
+        // Clone the response before caching
+        const responseClone = response.clone();
+        cache.put(request, responseClone);
+      }
     }
     return response;
   } catch (error) {
@@ -170,7 +178,11 @@ async function handleNavigation(request) {
       if (response.ok) {
         const cache = caches.open(CACHE_NAME);
         cache.then((c) => {
-          if (isHttpRequest(request)) c.put(request, response.clone());
+          if (isHttpRequest(request)) {
+            // Clone the response before caching
+            const responseClone = response.clone();
+            c.put(request, responseClone);
+          }
         });
       }
       return response;
@@ -191,7 +203,11 @@ async function handleOtherRequests(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(RUNTIME_CACHE);
-      if (isHttpRequest(request)) cache.put(request, response.clone());
+      if (isHttpRequest(request)) {
+        // Clone the response before caching
+        const responseClone = response.clone();
+        cache.put(request, responseClone);
+      }
     }
     return response;
   } catch (error) {
@@ -207,7 +223,11 @@ async function updateCache(request) {
     const response = await fetch(request);
     if (response.ok) {
       const cache = await caches.open(RUNTIME_CACHE);
-      if (isHttpRequest(request)) cache.put(request, response.clone());
+      if (isHttpRequest(request)) {
+        // Clone the response before caching
+        const responseClone = response.clone();
+        cache.put(request, responseClone);
+      }
     }
   } catch (error) {
     console.log("Background cache update failed:", error);

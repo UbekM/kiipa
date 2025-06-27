@@ -1,7 +1,7 @@
 // Keepr Smart Contract Integration
 import { ethers } from 'ethers';
 
-// Contract ABI - This would be generated from the compiled contract
+// Contract ABI - Generated from compiled contract
 export const KEEPR_ABI = [
   // Events
   "event KeepCreated(uint256 indexed keepId, address indexed creator, address indexed recipient, string ipfsHash, uint256 unlockTime, uint8 keepType)",
@@ -10,23 +10,15 @@ export const KEEPR_ABI = [
   "event FallbackActivated(uint256 indexed keepId, address indexed fallbackRecipient, uint256 activatedAt)",
   "event RecipientChanged(uint256 indexed keepId, address indexed oldRecipient, address indexed newRecipient)",
   
-  // Structs
-  "struct Keep { uint256 id; address creator; address recipient; address fallbackRecipient; string ipfsHash; uint256 unlockTime; uint256 createdAt; uint8 status; uint8 keepType; string title; string description; }",
-  "struct KeepMetadata { string title; string description; uint8 keepType; uint256 unlockTime; string recipientEmail; string fallbackEmail; }",
-  
-  // Enums
-  "enum KeepStatus { Active, Claimed, Cancelled, Expired }",
-  "enum KeepType { Secret, Document, Key, Inheritance }",
-  
   // Functions
-  "function createKeep(address recipient, address fallbackRecipient, string calldata ipfsHash, uint256 unlockTime, KeepMetadata calldata metadata) external payable",
+  "function createKeep(address recipient, address fallbackRecipient, string calldata ipfsHash, uint256 unlockTime, tuple(string title, string description, uint8 keepType, uint256 unlockTime, string recipientEmail, string fallbackEmail) metadata) external payable",
   "function claimKeep(uint256 keepId) external",
   "function activateFallback(uint256 keepId) external",
   "function cancelKeep(uint256 keepId) external",
   "function changeRecipient(uint256 keepId, address newRecipient) external",
   "function getKeepsByCreator(address user) external view returns (uint256[] memory)",
   "function getKeepsByRecipient(address user) external view returns (uint256[] memory)",
-  "function getKeep(uint256 keepId) external view returns (Keep memory)",
+  "function getKeep(uint256 keepId) external view returns (tuple(uint256 id, address creator, address recipient, address fallbackRecipient, string ipfsHash, uint256 unlockTime, uint256 createdAt, uint8 status, uint8 keepType, string title, string description))",
   "function canActivateFallback(uint256 keepId) external view returns (bool)",
   "function getTotalKeeps() external view returns (uint256)",
   "function minUnlockDelay() external view returns (uint256)",
@@ -36,7 +28,12 @@ export const KEEPR_ABI = [
   "function pause() external",
   "function unpause() external",
   "function withdrawFees() external",
-  "function emergencyCancelKeep(uint256 keepId) external"
+  "function emergencyCancelKeep(uint256 keepId) external",
+  
+  // State variables
+  "function keeps(uint256) external view returns (uint256 id, address creator, address recipient, address fallbackRecipient, string ipfsHash, uint256 unlockTime, uint256 createdAt, uint8 status, uint8 keepType, string title, string description)",
+  "function userKeeps(address, uint256) external view returns (uint256)",
+  "function recipientKeeps(address, uint256) external view returns (uint256)"
 ];
 
 // Contract addresses (to be updated after deployment)
@@ -45,7 +42,7 @@ export const KEEPR_CONTRACTS = {
     keepr: "0x0000000000000000000000000000000000000000", // TODO: Deploy and update
   },
   4202: { // Lisk Sepolia
-    keepr: "0x0000000000000000000000000000000000000000", // TODO: Deploy and update
+    keepr: "0x7a1F22106a45348E510B84dE933D5BDA0842aF09",
   },
   1337: { // Hardhat Local
     keepr: "0x5FbDB2315678afecb367f032d93F642f64180aa3", // Default Hardhat address
@@ -215,12 +212,19 @@ export class KeeprContractService {
 export function useKeeprContract(chainId?: number) {
   const getContractAddress = () => {
     if (!chainId) return null;
-    return KEEPR_CONTRACTS[chainId as keyof typeof KEEPR_CONTRACTS]?.keepr || null;
+    const address = KEEPR_CONTRACTS[chainId as keyof typeof KEEPR_CONTRACTS]?.keepr;
+    // Check if address is zero address (not deployed)
+    if (address === "0x0000000000000000000000000000000000000000") {
+      return null;
+    }
+    return address || null;
   };
 
   const getContractService = (signer: ethers.Signer) => {
     const address = getContractAddress();
-    if (!address) throw new Error("Contract not deployed on this network");
+    if (!address) {
+      throw new Error(`Contract not deployed on network ${chainId}. Please deploy the contract first.`);
+    }
     return new KeeprContractService(address, signer);
   };
 

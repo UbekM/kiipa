@@ -16,4 +16,8 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// Initialize notification system
+import { initializeNotificationSystem } from "./lib/notifications";
+initializeNotificationSystem();
+
 createRoot(document.getElementById("root")!).render(<App />);

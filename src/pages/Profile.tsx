@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
+import { NotificationTest } from "@/components/keepr/NotificationTest";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -301,6 +302,21 @@ export default function Profile() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Development: Notification Testing */}
+          {import.meta.env.DEV && (
+            <Card className="border-forest-deep/10">
+              <CardHeader>
+                <CardTitle className="text-forest-deep flex items-center gap-2">
+                  <Bell className="w-5 h-5" />
+                  Development: Email Notification Testing
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <NotificationTest />
+              </CardContent>
+            </Card>
+          )}
 
           <div className="flex gap-3">
             <Button
