@@ -30,6 +30,7 @@ import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { InstallPrompt } from "@/components/keepr/InstallPrompt";
 import { useKeeps } from "@/hooks/useKeeps";
 import { useKeeprContract, BlockchainKeep } from "@/hooks/useKeeprContract";
+import { KEEP_STATUS, KEEP_TYPE } from "@/lib/contracts";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -117,11 +118,27 @@ export default function Dashboard() {
       recipient: blockchainKeep.recipient,
       fallback: blockchainKeep.fallbackRecipient,
       creator: blockchainKeep.creator,
-      unlockTime: new Date(blockchainKeep.unlockTime * 1000), // Convert Unix timestamp to Date
-      createdAt: new Date(blockchainKeep.createdAt * 1000), // Convert Unix timestamp to Date
-      status: blockchainKeep.status.toLowerCase() as Keep["status"],
+      unlockTime: (() => {
+        const timestamp = blockchainKeep.unlockTime * 1000;
+        const date = new Date(timestamp);
+        return isNaN(date.getTime()) ? new Date() : date;
+      })(),
+      createdAt: (() => {
+        const timestamp = blockchainKeep.createdAt * 1000;
+        const date = new Date(timestamp);
+        return isNaN(date.getTime()) ? new Date() : date;
+      })(),
+      status: (() => {
+        const statusString =
+          KEEP_STATUS[blockchainKeep.status as keyof typeof KEEP_STATUS];
+        return (statusString?.toLowerCase() as Keep["status"]) || "active";
+      })(),
       ipfsHash: blockchainKeep.ipfsHash,
-      keepType: blockchainKeep.keepType.toLowerCase() as Keep["keepType"],
+      keepType: (() => {
+        const typeString =
+          KEEP_TYPE[blockchainKeep.keepType as keyof typeof KEEP_TYPE];
+        return (typeString?.toLowerCase() as Keep["keepType"]) || "secret";
+      })(),
       blockchainId: blockchainKeep.id, // Add blockchain ID for reference
       ipfsError: false,
     }));
@@ -156,20 +173,29 @@ export default function Dashboard() {
     total: (keeps?.length || 0) + blockchainKeeps.length,
     active:
       (keeps?.filter((k) => k.status === "active").length || 0) +
-      blockchainKeeps.filter((k) => k.status === "Active").length,
+      blockchainKeeps.filter((k) => {
+        const statusString = KEEP_STATUS[k.status as keyof typeof KEEP_STATUS];
+        return statusString === "Active";
+      }).length,
     claimable:
       (keeps?.filter(
         (k) =>
           k.status === "unlocked" ||
           (k.unlockTime < new Date() && k.status === "active"),
       ).length || 0) +
-      blockchainKeeps.filter(
-        (k) =>
-          k.status === "Active" && k.unlockTime < Math.floor(Date.now() / 1000),
-      ).length,
+      blockchainKeeps.filter((k) => {
+        const statusString = KEEP_STATUS[k.status as keyof typeof KEEP_STATUS];
+        return (
+          statusString === "Active" &&
+          k.unlockTime < Math.floor(Date.now() / 1000)
+        );
+      }).length,
     claimed:
       (keeps?.filter((k) => k.status === "claimed").length || 0) +
-      blockchainKeeps.filter((k) => k.status === "Claimed").length,
+      blockchainKeeps.filter((k) => {
+        const statusString = KEEP_STATUS[k.status as keyof typeof KEEP_STATUS];
+        return statusString === "Claimed";
+      }).length,
   };
 
   const handleKeepAction = async (action: string, keep: Keep) => {

@@ -136,7 +136,14 @@ export function KeepCard({
     }
   };
 
-  const isExpired = keep.unlockTime < new Date();
+  const unlockTime =
+    keep.unlockTime instanceof Date && !isNaN(keep.unlockTime.getTime())
+      ? keep.unlockTime
+      : new Date(keep.unlockTime);
+
+  const isValidUnlockTime =
+    unlockTime instanceof Date && !isNaN(unlockTime.getTime());
+  const isExpired = isValidUnlockTime ? unlockTime < new Date() : false;
   const canClaim =
     keep.status === "unlocked" || (isExpired && keep.status === "active");
   const isCreator = currentUserAddress && keep.creator === currentUserAddress;
@@ -359,9 +366,11 @@ export function KeepCard({
                 isExpired ? "text-yellow-600" : "text-forest-deep"
               }`}
             >
-              {formatDistance(keep.unlockTime, new Date(), {
-                addSuffix: true,
-              })}
+              {isValidUnlockTime
+                ? formatDistance(unlockTime, new Date(), {
+                    addSuffix: true,
+                  })
+                : "Invalid date"}
             </p>
 
             {isExpired && keep.status === "active" && (
