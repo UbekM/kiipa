@@ -61,7 +61,7 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className=" bg-white">
       {/* Header */}
       <header className="border-b border-forest-deep/10 bg-white/50 backdrop-blur-sm">
         <div className="mobile-padding py-4">
@@ -87,7 +87,7 @@ export default function Profile() {
         </div>
       </header>
 
-      <main className="mobile-padding mobile-section">
+      <main className="mobile-padding mobile-section mt-14">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Profile Info */}
           <Card className="border-forest-deep/10">
@@ -339,7 +339,7 @@ export default function Profile() {
             <Button
               variant="outline"
               onClick={() => navigate("/dashboard")}
-              className="border-forest-deep/20"
+              className="border-forest-deep/20 mb-14"
             >
               <X className="w-4 h-4 mr-2" />
               Cancel

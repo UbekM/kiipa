@@ -501,7 +501,7 @@ export default function Dashboard() {
                         onClick={refreshKeeps}
                         size="sm"
                         variant="outline"
-                        className="text-xs px-3 py-1 h-7 border-blue-300 text-blue-700 hover:bg-blue-100"
+                        className="text-xs px-3 py-1 h-7 border-blue-300 text-white hover:bg-blue-900 bg-blue-800"
                       >
                         Retry Connection
                       </Button>
