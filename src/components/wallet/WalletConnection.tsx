@@ -308,14 +308,14 @@ export function WalletConnection() {
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div className="bg-white/60 backdrop-blur-md rounded-xl p-3">
             <p className="text-muted-foreground text-xs mb-1">Address</p>
-            <p className="font-mono text-forest-deep font-semibold">
+            <p className="font-mono text-forest-deep text-lg font-semibold">
               {formatAddress(address || "")}
             </p>
           </div>
 
           <div className="bg-white/60 backdrop-blur-md rounded-xl p-3">
             <p className="text-muted-foreground text-xs mb-1">Balance</p>
-            <p className="font-semibold text-forest-deep">
+            <p className="font-semibold text-lg text-forest-deep">
               {formatBalance(balance)} ETH
             </p>
           </div>
@@ -327,7 +327,7 @@ export function WalletConnection() {
             <Badge
               className={`${
                 isCorrectNetwork
-                  ? "bg-emerald-touch/10 text-emerald-touch border-emerald-touch/20"
+                  ? "bg-emerald-touch/10 text-emerald-touch border-emerald-touch/20 hover:text-white"
                   : "bg-red-500/10 text-red-600 border-red-500/20"
               }`}
             >

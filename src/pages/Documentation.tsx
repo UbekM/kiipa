@@ -276,7 +276,7 @@ const Documentation = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50">
+    <div className="bg-gradient-to-br pb-14 from-gray-50 via-white to-blue-50">
       {/* Header */}
       <header className="border-b border-forest-deep/5 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -297,7 +297,7 @@ const Documentation = () => {
                 </h1>
               </div>
             </div>
-            <WalletConnection />
+            {/* <WalletConnection /> */}
           </div>
         </div>
       </header>

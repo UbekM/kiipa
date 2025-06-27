@@ -277,7 +277,7 @@ export default function Dashboard() {
   return (
     <div className="app-container">
       <InstallPrompt />
-      <div className="mobile-page">
+      <div className="mobile-page mb-12">
         {/* Native-style header */}
         <div className="mobile-header">
           <div className="mobile-spacing-tight">
@@ -299,7 +299,7 @@ export default function Dashboard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="touch-target text-forest-deep hover:bg-forest-deep/5 rounded-xl relative"
+                  className="touch-target text-forest-deep hover:bg-forest-deep rounded-xl relative"
                   onClick={() => navigate("/profile")}
                 >
                   <Settings className="w-5 h-5" />
@@ -308,7 +308,7 @@ export default function Dashboard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="touch-target text-forest-deep hover:bg-forest-deep/5 rounded-xl relative"
+                  className="touch-target text-forest-deep hover:bg-forest-deep rounded-xl relative"
                 >
                   <Bell className="w-5 h-5" />
                   {stats.claimable > 0 && (
@@ -430,7 +430,7 @@ export default function Dashboard() {
                   placeholder="Search keeps..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 bg-white/60 backdrop-blur-md rounded-xl"
                 />
                 <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
@@ -527,7 +527,7 @@ export default function Dashboard() {
                         onClick={refreshKeeps}
                         size="sm"
                         variant="outline"
-                        className="text-xs px-3 py-1 h-7 border-blue-300 text-blue-700 hover:bg-blue-100"
+                        className="text-xs px-3 py-1 h-7 border-blue-300 text-white hover:bg-blue-900 bg-blue-800"
                       >
                         Retry Connection
                       </Button>

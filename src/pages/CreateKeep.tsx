@@ -600,7 +600,7 @@ export default function CreateKeep() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className=" bg-white">
       {/* Header */}
       <header className="border-b border-forest-deep/5 bg-white/90 backdrop-blur-sm">
         <div className="mobile-padding py-4">
@@ -626,9 +626,9 @@ export default function CreateKeep() {
         </div>
       </header>
 
-      <main className="mobile-padding mobile-section">
+      <main className="mobile-padding mobile-section mt-14">
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
-          <Card className="border-forest-deep/10 mb-6">
+          <Card className="border-forest-deep/10 mb-6 my-6">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -982,7 +982,7 @@ export default function CreateKeep() {
               type="button"
               variant="outline"
               onClick={() => navigate("/dashboard")}
-              className="border-forest-deep/20"
+              className="border-forest-deep/20 mb-14"
             >
               Cancel
             </Button>
