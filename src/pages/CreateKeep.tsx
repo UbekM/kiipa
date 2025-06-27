@@ -9,6 +9,7 @@ import {
   Key,
   Heart,
   Info,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,7 +82,7 @@ const getDateConstraints = () => {
 export default function CreateKeep() {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { address } = useWeb3ModalAccount();
+  const { address, chainId } = useWeb3ModalAccount();
   const { walletProvider } = useWeb3ModalProvider();
   const {
     createKeep,
@@ -90,6 +91,8 @@ export default function CreateKeep() {
     contractService,
   } = useKeeprContract();
   const [loading, setLoading] = useState(false);
+  const [balance, setBalance] = useState<string | null>(null);
+  const [balanceLoading, setBalanceLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [keepData, setKeepData] = useState({
     title: "",
@@ -134,6 +137,29 @@ export default function CreateKeep() {
       fileInputRef.current.value = "";
     }
   };
+
+  // Function to refresh balance
+  const refreshBalance = async () => {
+    if (address && walletProvider) {
+      setBalanceLoading(true);
+      try {
+        const provider = new ethers.BrowserProvider(walletProvider);
+        const signer = await provider.getSigner();
+        const balance = await provider.getBalance(signer.address);
+        setBalance(ethers.formatEther(balance));
+      } catch (error) {
+        console.error("Error refreshing balance:", error);
+        setBalance(null);
+      } finally {
+        setBalanceLoading(false);
+      }
+    }
+  };
+
+  // Load balance when wallet connects
+  React.useEffect(() => {
+    refreshBalance();
+  }, [address, walletProvider]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -375,26 +401,40 @@ export default function CreateKeep() {
         const platformFee = await contractService.getPlatformFee();
         console.log("Platform fee:", platformFee);
 
+        // Get current network and address
+        const currentChainId = await walletProvider.request({
+          method: "eth_chainId",
+        });
         const signerAddress = await walletProvider.request({
           method: "eth_accounts",
         });
+        console.log("Current chain ID:", currentChainId);
         console.log("Signer address:", signerAddress[0]);
 
-        // Check if user has enough balance
-        const balance = await walletProvider.request({
-          method: "eth_getBalance",
-          params: [signerAddress[0], "latest"],
-        });
+        // Validate we're on the correct network
+        const expectedChainId = "0x1066"; // Lisk Sepolia (4202 in decimal)
+        if (currentChainId !== expectedChainId) {
+          throw new Error(
+            `Wrong network. Expected Lisk Sepolia (${expectedChainId}), got ${currentChainId}. Please switch to Lisk Sepolia testnet.`,
+          );
+        }
+
+        // Get balance using the same method as WalletConnection for consistency
+        const provider = new ethers.BrowserProvider(walletProvider);
+        const signer = await provider.getSigner();
+        const balance = await provider.getBalance(signer.address);
         const balanceEth = parseFloat(ethers.formatEther(balance));
         const feeEth = parseFloat(platformFee);
 
-        console.log("User balance:", balanceEth, "ETH");
-        console.log("Required fee:", feeEth, "ETH");
+        console.log("User balance (wei):", balance.toString());
+        console.log("User balance (ETH):", balanceEth);
+        console.log("Required fee (ETH):", feeEth);
 
         if (balanceEth < feeEth + 0.01) {
           // Add 0.01 ETH buffer for gas
+          const shortfall = feeEth + 0.01 - balanceEth;
           throw new Error(
-            `Insufficient balance. You need at least ${(feeEth + 0.01).toFixed(4)} ETH (${feeEth} ETH fee + gas). Current balance: ${balanceEth.toFixed(4)} ETH`,
+            `Insufficient balance. You need at least ${(feeEth + 0.01).toFixed(4)} ETH (${feeEth} ETH fee + gas). Current balance: ${balanceEth.toFixed(4)} ETH. Shortfall: ${shortfall.toFixed(4)} ETH. Please get testnet ETH from a faucet.`,
           );
         }
       } catch (validationError) {
@@ -625,6 +665,62 @@ export default function CreateKeep() {
           </div>
         </div>
       </header>
+
+      {/* Balance and Network Status */}
+      {address && (
+        <div className="mobile-padding mb-6">
+          <Card className="border-forest-deep/10">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-forest-deep/10 rounded-lg flex items-center justify-center">
+                    <Shield className="w-4 h-4 text-forest-deep" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-forest-deep">
+                      Network Status
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {chainId === 4202
+                        ? "Lisk Sepolia Testnet"
+                        : chainId === 1135
+                          ? "Lisk Mainnet"
+                          : "Unknown Network"}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-forest-deep">
+                    Balance
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs text-muted-foreground">
+                      {balanceLoading ? (
+                        <span className="animate-pulse">Loading...</span>
+                      ) : balance ? (
+                        `${parseFloat(balance).toFixed(4)} ETH`
+                      ) : (
+                        "Unknown"
+                      )}
+                    </p>
+                    <Button
+                      onClick={refreshBalance}
+                      size="sm"
+                      variant="ghost"
+                      className="h-6 w-6 p-0 hover:bg-forest-deep/5"
+                      disabled={balanceLoading}
+                    >
+                      <RefreshCw
+                        className={`w-3 h-3 ${balanceLoading ? "animate-spin" : ""}`}
+                      />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
       <main className="mobile-padding mobile-section mt-14">
         <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
