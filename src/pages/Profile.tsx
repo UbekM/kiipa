@@ -293,10 +293,10 @@ export default function Profile() {
                 </h1>
               </div>
             </div>
-            <WalletConnection />
           </div>
         </div>
       </header>
+      <WalletConnection />
 
       <main className="mobile-padding mobile-section mt-14">
         <div className="max-w-2xl mx-auto space-y-6">
@@ -341,7 +341,7 @@ export default function Profile() {
                         </Badge>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 text-sm text-forest-deep/60">
+                      <div className="flex items-center gap-2 text-sm text-forest-deep">
                         <AlertTriangle className="w-4 h-4" />
                         Wallet not connected
                       </div>
@@ -472,11 +472,16 @@ export default function Profile() {
                       setSettings({ ...settings, inactivityPeriod: value })
                     }
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select period" />
+                    <SelectTrigger className="text-forest-deep">
+                      <SelectValue
+                        placeholder="Select period"
+                        className="text-forest-deep"
+                      />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="30">30 Days</SelectItem>
+                      <SelectItem value="30" className="text-forest-deep">
+                        30 Days
+                      </SelectItem>
                       <SelectItem value="60">60 Days</SelectItem>
                       <SelectItem value="90">90 Days</SelectItem>
                       <SelectItem value="365">1 Year</SelectItem>
@@ -484,7 +489,7 @@ export default function Profile() {
                   </Select>
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-2 text-forest-deep">
                   <label className="text-sm font-medium text-forest-deep">
                     Activity Check Method
                   </label>
@@ -495,7 +500,10 @@ export default function Profile() {
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Select method" />
+                      <SelectValue
+                        placeholder="Select method"
+                        className="text-forest-deep"
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="automatic">
@@ -571,6 +579,7 @@ export default function Profile() {
                     onCheckedChange={(checked) =>
                       setSettings({ ...settings, emailNotifications: checked })
                     }
+                    className={`data-[state=checked]:bg-forest-deep/60 data-[state=unchecked]:bg-gray-300`}
                   />
                 </div>
 
@@ -588,6 +597,7 @@ export default function Profile() {
                     onCheckedChange={(checked) =>
                       setSettings({ ...settings, pushNotifications: checked })
                     }
+                    className={`data-[state=checked]:bg-forest-deep/60 data-[state=unchecked]:bg-gray-300`}
                   />
                 </div>
 
@@ -605,6 +615,7 @@ export default function Profile() {
                     onCheckedChange={(checked) =>
                       setSettings({ ...settings, statusUpdates: checked })
                     }
+                    className={`data-[state=checked]:bg-forest-deep/60 data-[state=unchecked]:bg-gray-300`}
                   />
                 </div>
 
@@ -622,6 +633,7 @@ export default function Profile() {
                     onCheckedChange={(checked) =>
                       setSettings({ ...settings, activityReminders: checked })
                     }
+                    className={`data-[state=checked]:bg-forest-deep/60 data-[state=unchecked]:bg-gray-300`}
                   />
                 </div>
               </div>
