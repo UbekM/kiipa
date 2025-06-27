@@ -47,6 +47,7 @@ import {
 import { isNetworkSupported, switchToSupportedNetwork } from "@/lib/wallet";
 import { isValidEmail } from "@/lib/email";
 import { useKeeprContract } from "@/hooks/useKeeprContract";
+import { ethers } from "ethers";
 
 const getTypeIcon = (type: string) => {
   switch (type) {
@@ -86,6 +87,7 @@ export default function CreateKeep() {
     createKeep,
     loading: contractLoading,
     isContractDeployed,
+    contractService,
   } = useKeeprContract();
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -202,6 +204,13 @@ export default function CreateKeep() {
         throw new Error("Please enter a valid recipient wallet address");
       }
 
+      // Prevent creator from creating keeps for themselves
+      if (keepData.recipient.toLowerCase() === address.toLowerCase()) {
+        throw new Error(
+          "You cannot create a keep for yourself. Please enter a different recipient address.",
+        );
+      }
+
       // Validate fallback recipient address if provided
       if (
         keepData.fallbackRecipient &&
@@ -209,6 +218,16 @@ export default function CreateKeep() {
       ) {
         throw new Error(
           "Please enter a valid fallback recipient wallet address",
+        );
+      }
+
+      // Prevent creator from using themselves as fallback
+      if (
+        keepData.fallbackRecipient &&
+        keepData.fallbackRecipient.toLowerCase() === address.toLowerCase()
+      ) {
+        throw new Error(
+          "You cannot use yourself as a fallback recipient. Please enter a different fallback address.",
         );
       }
 
@@ -336,6 +355,92 @@ export default function CreateKeep() {
 
       console.log("Step 7: Create keep on blockchain");
 
+      // Get contract service for validation
+      if (!contractService) {
+        toast({
+          variant: "destructive",
+          title: "Contract Service Not Available",
+          description:
+            "Unable to connect to the smart contract. Please check your network connection and try again.",
+        });
+        return;
+      }
+
+      // Validate contract state before creating keep
+      try {
+        console.log("Validating contract state...");
+        const configuration = await contractService.getConfiguration();
+        console.log("Contract configuration:", configuration);
+
+        const platformFee = await contractService.getPlatformFee();
+        console.log("Platform fee:", platformFee);
+
+        const signerAddress = await walletProvider.request({
+          method: "eth_accounts",
+        });
+        console.log("Signer address:", signerAddress[0]);
+
+        // Check if user has enough balance
+        const balance = await walletProvider.request({
+          method: "eth_getBalance",
+          params: [signerAddress[0], "latest"],
+        });
+        const balanceEth = parseFloat(ethers.formatEther(balance));
+        const feeEth = parseFloat(platformFee);
+
+        console.log("User balance:", balanceEth, "ETH");
+        console.log("Required fee:", feeEth, "ETH");
+
+        if (balanceEth < feeEth + 0.01) {
+          // Add 0.01 ETH buffer for gas
+          throw new Error(
+            `Insufficient balance. You need at least ${(feeEth + 0.01).toFixed(4)} ETH (${feeEth} ETH fee + gas). Current balance: ${balanceEth.toFixed(4)} ETH`,
+          );
+        }
+      } catch (validationError) {
+        console.error("Contract validation failed:", validationError);
+        toast({
+          variant: "destructive",
+          title: "Contract Validation Failed",
+          description:
+            validationError instanceof Error
+              ? validationError.message
+              : "Failed to validate contract state",
+        });
+        return;
+      }
+
+      // Test contract accessibility
+      try {
+        console.log("Testing contract accessibility...");
+        const totalKeeps = await contractService.getTotalKeeps();
+        console.log("Total keeps on contract:", totalKeeps);
+      } catch (testError) {
+        console.error("Contract accessibility test failed:", testError);
+        toast({
+          variant: "destructive",
+          title: "Contract Not Accessible",
+          description:
+            "Unable to communicate with the smart contract. Please check your network connection and try again.",
+        });
+        return;
+      }
+
+      // Check if recipient has encryption keys
+      try {
+        console.log("Checking recipient encryption keys...");
+        await getEncryptionKeysForAddress(keepData.recipient);
+        console.log("Recipient has encryption keys");
+      } catch (keyError) {
+        console.warn("Recipient may not have encryption keys:", keyError);
+        toast({
+          variant: "default",
+          title: "Recipient Setup Required",
+          description:
+            "The recipient may need to visit Keepr and connect their wallet to set up encryption keys before they can access this keep.",
+        });
+      }
+
       // Convert keep type to contract enum
       const keepTypeMap: { [key: string]: number } = {
         secret: 0,
@@ -349,71 +454,138 @@ export default function CreateKeep() {
         new Date(keepData.unlockTime).getTime() / 1000,
       );
 
-      const receipt = await createKeep(
-        keepData.recipient,
-        keepData.fallbackRecipient ||
+      console.log("Creating keep with parameters:", {
+        recipient: keepData.recipient,
+        fallbackRecipient:
+          keepData.fallbackRecipient ||
           "0x0000000000000000000000000000000000000000",
         ipfsHash,
         unlockTimestamp,
-        {
+        metadata: {
           title: keepData.title,
           description: keepData.description,
           keepType: keepTypeMap[keepData.type] || 0,
           recipientEmail: keepData.recipientEmail,
           fallbackEmail: keepData.fallbackEmail,
         },
-      );
-
-      // Schedule email notifications if emails are provided
-      if (keepData.recipientEmail || keepData.fallbackEmail) {
-        try {
-          const { scheduleKeepNotification } = await import("@/lib/email");
-          const notificationData = {
-            keepTitle: keepData.title,
-            keepDescription: keepData.description,
-            unlockTime: keepData.unlockTime,
-            creatorAddress: address,
-            recipientAddress: keepData.recipient,
-            recipientEmail: keepData.recipientEmail,
-            fallbackAddress: keepData.fallbackRecipient,
-            fallbackEmail: keepData.fallbackEmail,
-            appUrl: window.location.origin,
-          };
-
-          await scheduleKeepNotification(
-            notificationData,
-            new Date(keepData.unlockTime),
-          );
-          console.log(
-            "Email notifications scheduled for:",
-            new Date(keepData.unlockTime),
-          );
-        } catch (error) {
-          console.warn("Failed to schedule email notifications:", error);
-          // Don't fail the keep creation if email scheduling fails
-        }
-      }
-
-      // Show fallback recipient warning if they haven't used the app
-      let fallbackWarning = null;
-      if (keepData.fallbackRecipient) {
-        fallbackWarning = `Note: Your fallback recipient (${keepData.fallbackRecipient.slice(0, 6)}...${keepData.fallbackRecipient.slice(-4)}) will need to visit Keepr and connect their wallet to access this keep. They will receive an email notification when the keep becomes available.`;
-      }
-
-      toast({
-        title: "Keep Created Successfully",
-        description: `Your Keep was created and stored on the blockchain! Transaction: ${receipt.hash}`,
       });
 
-      if (fallbackWarning) {
-        toast({
-          variant: "default",
-          title: "Fallback Recipient Setup",
-          description: fallbackWarning,
-        });
-      }
+      try {
+        const receipt = await createKeep(
+          keepData.recipient,
+          keepData.fallbackRecipient ||
+            "0x0000000000000000000000000000000000000000",
+          ipfsHash,
+          unlockTimestamp,
+          {
+            title: keepData.title,
+            description: keepData.description,
+            keepType: keepTypeMap[keepData.type] || 0,
+            recipientEmail: keepData.recipientEmail,
+            fallbackEmail: keepData.fallbackEmail,
+          },
+        );
 
-      navigate("/dashboard");
+        // Schedule email notifications if emails are provided
+        if (keepData.recipientEmail || keepData.fallbackEmail) {
+          try {
+            const { scheduleKeepNotification } = await import("@/lib/email");
+            const notificationData = {
+              keepTitle: keepData.title,
+              keepDescription: keepData.description,
+              unlockTime: keepData.unlockTime,
+              creatorAddress: address,
+              recipientAddress: keepData.recipient,
+              recipientEmail: keepData.recipientEmail,
+              fallbackAddress: keepData.fallbackRecipient,
+              fallbackEmail: keepData.fallbackEmail,
+              appUrl: window.location.origin,
+            };
+
+            await scheduleKeepNotification(
+              notificationData,
+              new Date(keepData.unlockTime),
+            );
+            console.log(
+              "Email notifications scheduled for:",
+              new Date(keepData.unlockTime),
+            );
+          } catch (error) {
+            console.warn("Failed to schedule email notifications:", error);
+            // Don't fail the keep creation if email scheduling fails
+          }
+        }
+
+        // Show fallback recipient warning if they haven't used the app
+        let fallbackWarning = null;
+        if (keepData.fallbackRecipient) {
+          fallbackWarning = `Note: Your fallback recipient (${keepData.fallbackRecipient.slice(0, 6)}...${keepData.fallbackRecipient.slice(-4)}) will need to visit Keepr and connect their wallet to access this keep. They will receive an email notification when the keep becomes available.`;
+        }
+
+        toast({
+          title: "Keep Created Successfully",
+          description: `Your Keep was created and stored on the blockchain! Transaction: ${receipt.hash}`,
+        });
+
+        if (fallbackWarning) {
+          toast({
+            variant: "default",
+            title: "Fallback Recipient Setup",
+            description: fallbackWarning,
+          });
+        }
+
+        navigate("/dashboard");
+      } catch (contractError) {
+        console.error("Contract creation error:", contractError);
+
+        // Provide specific error messages based on the error
+        let errorMessage = "Failed to create Keep on blockchain";
+
+        if (contractError instanceof Error) {
+          if (
+            contractError.message.includes("Cannot create keep for yourself")
+          ) {
+            errorMessage =
+              "You cannot create a keep for yourself. Please use a different recipient address.";
+          } else if (
+            contractError.message.includes("Insufficient platform fee")
+          ) {
+            errorMessage =
+              "Insufficient platform fee. Please ensure you have enough ETH to cover the transaction fee.";
+          } else if (contractError.message.includes("Unlock time too soon")) {
+            errorMessage =
+              "Unlock time is too soon. Please set the unlock time to at least 1 day from now.";
+          } else if (contractError.message.includes("Unlock time too far")) {
+            errorMessage =
+              "Unlock time is too far. Please set the unlock time to no more than 365 days from now.";
+          } else if (
+            contractError.message.includes("Invalid recipient address")
+          ) {
+            errorMessage =
+              "Invalid recipient address. Please check the address and try again.";
+          } else if (contractError.message.includes("missing revert data")) {
+            errorMessage =
+              "Transaction failed. This might be due to insufficient gas, network issues, or contract validation. Please check your wallet balance and try again.";
+          } else if (
+            contractError.message.includes("Internal JSON-RPC error")
+          ) {
+            errorMessage =
+              "Network error. Please check your connection and try again. If the problem persists, try switching networks.";
+          } else {
+            errorMessage = contractError.message;
+          }
+        }
+
+        toast({
+          variant: "destructive",
+          title: "Blockchain Transaction Failed",
+          description: errorMessage,
+        });
+
+        // Don't navigate away, let user try again
+        return;
+      }
     } catch (error) {
       console.error("CreateKeep error:", error);
       toast({

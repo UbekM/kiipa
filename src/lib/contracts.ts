@@ -124,23 +124,73 @@ export class KeeprContractService {
       fallbackEmail: string;
     }
   ): Promise<ethers.ContractTransaction> {
-    const platformFee = await this.contract.platformFee();
-    
-    return this.contract.createKeep(
+    console.log("ContractService.createKeep called with:", {
       recipient,
       fallbackRecipient,
       ipfsHash,
       unlockTime,
-      {
-        title: metadata.title,
-        description: metadata.description,
-        keepType: metadata.keepType,
-        unlockTime: unlockTime,
-        recipientEmail: metadata.recipientEmail,
-        fallbackEmail: metadata.fallbackEmail
-      },
-      { value: platformFee.toString() }
-    );
+      metadata
+    });
+
+    const platformFee = await this.contract.platformFee();
+    console.log("Platform fee:", platformFee.toString());
+    
+    const signerAddress = await this.signer.getAddress();
+    console.log("Signer address:", signerAddress);
+    
+    // Validate inputs before making the call
+    if (recipient === signerAddress) {
+      throw new Error("Cannot create keep for yourself");
+    }
+    
+    if (recipient === "0x0000000000000000000000000000000000000000") {
+      throw new Error("Invalid recipient address");
+    }
+    
+    const currentTime = Math.floor(Date.now() / 1000);
+    const minDelay = await this.contract.minUnlockDelay();
+    const maxDelay = await this.contract.maxUnlockDelay();
+    
+    console.log("Time validation:", {
+      currentTime,
+      unlockTime,
+      minDelay: minDelay.toString(),
+      maxDelay: maxDelay.toString(),
+      minAllowed: currentTime + Number(minDelay),
+      maxAllowed: currentTime + Number(maxDelay)
+    });
+    
+    if (unlockTime <= currentTime + Number(minDelay)) {
+      throw new Error("Unlock time too soon");
+    }
+    
+    if (unlockTime > currentTime + Number(maxDelay)) {
+      throw new Error("Unlock time too far");
+    }
+    
+    try {
+      const tx = await this.contract.createKeep(
+        recipient,
+        fallbackRecipient,
+        ipfsHash,
+        unlockTime,
+        {
+          title: metadata.title,
+          description: metadata.description,
+          keepType: metadata.keepType,
+          unlockTime: unlockTime,
+          recipientEmail: metadata.recipientEmail,
+          fallbackEmail: metadata.fallbackEmail
+        },
+        { value: platformFee.toString() }
+      );
+      
+      console.log("Transaction created:", tx.hash);
+      return tx;
+    } catch (error) {
+      console.error("Contract call failed:", error);
+      throw error;
+    }
   }
 
   // Claim a keep
