@@ -63,6 +63,20 @@ const getTypeIcon = (type: string) => {
   }
 };
 
+// Helper function to format date constraints
+const getDateConstraints = () => {
+  const now = new Date();
+  const minDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 1 day from now
+  const maxDate = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000); // 365 days from now
+
+  return {
+    min: minDate.toISOString().slice(0, 16), // Format for datetime-local input
+    max: maxDate.toISOString().slice(0, 16),
+    minDate,
+    maxDate,
+  };
+};
+
 export default function CreateKeep() {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -207,6 +221,20 @@ export default function CreateKeep() {
       if (keepData.fallbackEmail && !isValidEmail(keepData.fallbackEmail)) {
         throw new Error(
           "Please enter a valid fallback recipient email address",
+        );
+      }
+
+      // Validate unlock time
+      if (!keepData.unlockTime) {
+        throw new Error("Please set an unlock time for your keep");
+      }
+
+      const unlockDate = new Date(keepData.unlockTime);
+      const { minDate, maxDate } = getDateConstraints();
+
+      if (unlockDate < minDate || unlockDate > maxDate) {
+        throw new Error(
+          "Unlock time must be between 1 day and 365 days from now",
         );
       }
 
@@ -740,7 +768,8 @@ export default function CreateKeep() {
                     onChange={(e) =>
                       setKeepData({ ...keepData, unlockTime: e.target.value })
                     }
-                    min={new Date().toISOString().split("T")[0]}
+                    min={getDateConstraints().min}
+                    max={getDateConstraints().max}
                     required
                     className="bg-white"
                   />
