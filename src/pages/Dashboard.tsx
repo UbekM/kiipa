@@ -32,6 +32,18 @@ import { useKeeps } from "@/hooks/useKeeps";
 import { useKeeprContract, BlockchainKeep } from "@/hooks/useKeeprContract";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { KEEP_STATUS, KEEP_TYPE } from "@/lib/contracts";
+import {
+  useWeb3Modal,
+  useWeb3ModalProvider,
+} from "@web3modal/ethers/react";
+import {
+  Wallet,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Power,
+  RefreshCw,
+} from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -65,6 +77,7 @@ export default function Dashboard() {
   const [showSearch, setShowSearch] = useState(false);
   const [blockchainKeeps, setBlockchainKeeps] = useState<BlockchainKeep[]>([]);
   const [blockchainLoading, setBlockchainLoading] = useState(false);
+  const { open } = useWeb3Modal();
 
   // Fetch blockchain keeps
   const fetchBlockchainKeeps = async () => {
@@ -290,14 +303,14 @@ export default function Dashboard() {
                   <Shield className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-forest-deep">Keepr</h1>
+                  <h1 className="text-xl font-bold text-forest-deep">Kiipa</h1>
                   <p className="text-xs text-muted-foreground">
                     Digital Legacy Manager
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
@@ -317,17 +330,23 @@ export default function Dashboard() {
                     <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
                 </Button>
+                <Button
+                  onClick={() => open()}
+                  className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
+                >
+                  <Power className="w-4 h-4" /> Disconnect
+                </Button>
               </div>
             </div>
 
             {/* Wallet connection */}
-            <div className="mb-4">
+            <div className="mb-4 w-full">
               <WalletConnection />
             </div>
 
             {/* Welcome message */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-forest-deep mb-1">
+            <div className="mb-1">
+              <h2 className="text-xl font-bold text-forest-deep mb-1">
                 {settingsLoading ? (
                   <span className="flex items-center gap-2">
                     Welcome back! 👋
@@ -358,7 +377,7 @@ export default function Dashboard() {
                     Total Keeps
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-forest-deep">
+                <div className="text-3xl font-bold text-forest-deep">
                   {loading ? (
                     <div className="h-8 bg-forest-deep/10 rounded animate-pulse w-12"></div>
                   ) : (
@@ -376,7 +395,7 @@ export default function Dashboard() {
                     Active
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-emerald-touch">
+                <div className="text-3xl font-bold text-emerald-touch">
                   {loading ? (
                     <div className="h-8 bg-emerald-touch/10 rounded animate-pulse w-12"></div>
                   ) : (
@@ -395,7 +414,7 @@ export default function Dashboard() {
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-2xl font-bold text-yellow-600">
+                  <div className="text-3xl font-bold text-yellow-600">
                     {loading ? (
                       <div className="h-8 bg-yellow-500/10 rounded animate-pulse w-12"></div>
                     ) : (
@@ -422,7 +441,7 @@ export default function Dashboard() {
                     Claimed
                   </span>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-3xl font-bold text-blue-600">
                   {loading ? (
                     <div className="h-8 bg-blue-500/10 rounded animate-pulse w-12"></div>
                   ) : (

@@ -91,19 +91,19 @@ export function NotificationTest() {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-forest-deep">
             <Mail className="w-5 h-5" />
             Test Email Notifications
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 text-forest-deep">
           <div className="space-y-2">
             <Label htmlFor="ipfs-hash">IPFS Hash</Label>
             <Input
               id="ipfs-hash"
               placeholder="Enter IPFS hash of a keep"
               value={ipfsHash}
-              onChange={(e) => setIpfsHash(e.target.value)}
+              onChange={(e) => setIpfsHash(e.target.value)} className="bg-white"
             />
           </div>
 
@@ -115,7 +115,7 @@ export function NotificationTest() {
             >
               {loading ? "Sending..." : "Send Test Notification"}
             </Button>
-            <Button variant="outline" onClick={refreshJobs}>
+            <Button variant="outline" className="text-white" onClick={refreshJobs}>
               Refresh
             </Button>
           </div>
@@ -129,7 +129,7 @@ export function NotificationTest() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Notification History</CardTitle>
+          <CardTitle className="text-forest-deep">Notification History</CardTitle>
         </CardHeader>
         <CardContent>
           {jobs.length === 0 ? (

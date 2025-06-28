@@ -386,7 +386,7 @@ export default function Onboarding() {
                 variant="ghost"
                 size="sm"
                 onClick={handleSkip}
-                className="text-muted-foreground hover:bg-forest-deep/5 rounded-xl px-3 py-2 text-sm"
+                className="text-muted-foreground hover:bg-forest-deep rounded-xl px-3 py-2 text-sm"
               >
                 Skip
               </Button>

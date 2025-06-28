@@ -387,12 +387,12 @@ export default function KeepReveal() {
                 </h1>
               </div>
             </div>
-            <WalletConnection />
+            {/* <WalletConnection /> */}
           </div>
         </div>
       </header>
 
-      <main className="mobile-padding mobile-section">
+      <main className="mobile-padding mobile-section mt-8">
         <div className="max-w-2xl mx-auto space-y-6">
           {/* Keep Info */}
           <Card className="border-forest-deep/10">

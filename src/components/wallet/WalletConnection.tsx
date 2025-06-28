@@ -116,7 +116,7 @@ export function WalletConnection() {
     return (
       <Button
         onClick={() => open()}
-        className="btn-native w-full flex items-center justify-center gap-3 text-base font-semibold"
+        className="btn-native w-auto mx-auto flex items-center justify-center gap-3 text-base font-semibold"
         size="lg"
       >
         <Wallet className="w-5 h-5" />
@@ -128,7 +128,7 @@ export function WalletConnection() {
   const isCorrectNetwork = chainId ? isLiskNetwork(chainId) : false;
 
   return (
-    <div className="w-full space-y-3">
+    <div className="w-11/12 mx-auto space-y-1 mt-1">
       {/* Network Status Alert */}
       {!isCorrectNetwork && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-2xl">
@@ -155,7 +155,7 @@ export function WalletConnection() {
 
       {/* Connected Wallet Card */}
       <div className="card-native p-4">
-        <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-emerald-touch/10 rounded-xl flex items-center justify-center">
               <Wallet className="w-5 h-5 text-emerald-touch" />
@@ -176,9 +176,9 @@ export function WalletConnection() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="touch-target hover:bg-forest-deep/5 rounded-xl p-2"
+                className="touch-target hover:bg-forest-deep rounded-xl bg-forest-deep/10 hover:text-white p-2"
               >
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-5 h-5 text-forest-deep hover:text-white" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -190,7 +190,7 @@ export function WalletConnection() {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <div className="p-3 space-y-3">
+              <div className="p-3 space-y-1">
                 {/* Address */}
                 <div>
                   <p className="text-xs text-muted-foreground mb-2">Address:</p>
@@ -295,7 +295,7 @@ export function WalletConnection() {
 
               <DropdownMenuItem
                 onClick={() => open()}
-                className="cursor-pointer text-destructive focus:text-destructive rounded-xl"
+                className="cursor-pointer text-destructive focus:text-destructive rounded-xl bg-red-100 font-bold"
               >
                 <Power className="w-4 h-4 mr-3" />
                 Disconnect
@@ -323,7 +323,7 @@ export function WalletConnection() {
 
         {/* Network Badge */}
         {chainId && (
-          <div className="mt-3 flex justify-center">
+          <div className="mt-1 flex justify-center">
             <Badge
               className={`${
                 isCorrectNetwork
@@ -336,6 +336,7 @@ export function WalletConnection() {
           </div>
         )}
       </div>
+      
     </div>
   );
 }
