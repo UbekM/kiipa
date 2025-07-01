@@ -411,11 +411,11 @@ export default function CreateKeep() {
         console.log("Current chain ID:", currentChainId);
         console.log("Signer address:", signerAddress[0]);
 
-        // Validate we're on the correct network
-        const expectedChainId = "0x1066"; // Lisk Sepolia (4202 in decimal)
-        if (currentChainId !== expectedChainId) {
+        // Validate we're on the correct network (dynamic check)
+        const currentChainIdNum = parseInt(currentChainId, 16);
+        if (chainId && currentChainIdNum !== chainId) {
           throw new Error(
-            `Wrong network. Expected Lisk Sepolia (${expectedChainId}), got ${currentChainId}. Please switch to Lisk Sepolia testnet.`,
+            `Wrong network. Expected chain ID ${chainId} (0x${chainId.toString(16)}), got ${currentChainId} (dec: ${currentChainIdNum}). Please switch to the correct network.`,
           );
         }
 
@@ -665,7 +665,6 @@ export default function CreateKeep() {
         </div>
       </header>
       <WalletConnection />
-
 
       {/* Balance and Network Status */}
       {/* {address && (
