@@ -1,21 +1,13 @@
 import { Loader2 } from "lucide-react";
 
-interface LoadingStateProps {
-  title?: string;
-  description?: string;
-}
-
-export function LoadingState({
-  title = "Loading",
-  description = "Please wait while we fetch your data",
-}: LoadingStateProps) {
+export function LoadingState() {
   return (
-    <div className="empty-state min-h-screen page-shell" role="status" aria-live="polite">
-      <div className="empty-state-icon">
-        <Loader2 className="w-7 h-7 text-forest-deep animate-spin" aria-hidden />
-      </div>
-      <h2 className="font-display text-xl text-forest-deep mb-1">{title}</h2>
-      <p className="text-muted-foreground text-sm max-w-xs">{description}</p>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <Loader2 className="w-12 h-12 text-forest-deep animate-spin mb-4" />
+      <h2 className="text-xl font-bold text-forest-deep mb-2">Loading...</h2>
+      <p className="text-muted-foreground">
+        Please wait while we fetch your data
+      </p>
     </div>
   );
 }

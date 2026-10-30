@@ -9,6 +9,7 @@ import {
   Eye,
   Edit,
   Trash2,
+  Archive,
   AlertTriangle,
   ChevronRight,
   Key,
@@ -68,32 +69,33 @@ export function KeepCard({
     switch (status) {
       case "active":
         return {
-          color: "bg-emerald-touch/10 text-emerald-touch border-emerald-touch/20",
+          color:
+            "bg-emerald-touch/10 text-emerald-touch border-emerald-touch/20",
           label: "Active",
         };
       case "unlocked":
         return {
-          color: "bg-warning/10 text-warning border-warning/20",
+          color: "bg-yellow-500/10 text-yellow-600 border-yellow-500/20",
           label: "Ready",
         };
       case "claimed":
         return {
-          color: "bg-secondary text-forest-deep border-border",
+          color: "bg-blue-500/10 text-blue-600 border-blue-500/20",
           label: "Claimed",
         };
       case "cancelled":
         return {
-          color: "bg-muted text-muted-foreground border-border",
+          color: "bg-gray-500/10 text-gray-600 border-gray-500/20",
           label: "Cancelled",
         };
       case "error":
         return {
-          color: "bg-destructive/10 text-destructive border-destructive/20",
+          color: "bg-red-500/10 text-red-600 border-red-500/20",
           label: "Error",
         };
       default:
         return {
-          color: "bg-muted text-muted-foreground border-border",
+          color: "bg-gray-500/10 text-gray-600 border-gray-500/20",
           label: "Unknown",
         };
     }
@@ -104,31 +106,31 @@ export function KeepCard({
       case "secret":
         return {
           icon: Shield,
-          color: "bg-secondary text-forest-deep",
+          color: "bg-purple-500/10 text-purple-600",
           label: "Secret",
         };
       case "document":
         return {
           icon: FileText,
-          color: "bg-secondary text-pine-fade",
+          color: "bg-blue-500/10 text-blue-600",
           label: "Document",
         };
       case "key":
         return {
           icon: Key,
-          color: "bg-secondary text-emerald-touch",
+          color: "bg-orange-500/10 text-orange-600",
           label: "Key",
         };
       case "inheritance":
         return {
           icon: Heart,
-          color: "bg-secondary text-forest-deep",
+          color: "bg-red-500/10 text-red-600",
           label: "Inheritance",
         };
       default:
         return {
           icon: Shield,
-          color: "bg-muted text-muted-foreground",
+          color: "bg-gray-500/10 text-gray-600",
           label: "Keep",
         };
     }
@@ -151,32 +153,27 @@ export function KeepCard({
 
   return (
     <div
-      className={`card-native group ${compact ? "p-4" : "p-4 sm:p-5"} cursor-pointer focus-within:ring-2 focus-within:ring-ring/40`}
+      className={`card-native group transition-all duration-200 active:scale-[0.98] ${
+        compact ? "p-4" : "p-5"
+      } cursor-pointer`}
       onClick={() => onView?.(keep)}
-      role="button"
-      tabIndex={0}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          onView?.(keep);
-        }
-      }}
     >
-      <div className="flex items-start justify-between mb-3 gap-2">
+      {/* Header */}
+      <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
           <div
-            className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 ${typeConfig.color}`}
+            className={`w-12 h-12 rounded-2xl flex items-center justify-center ${typeConfig.color}`}
           >
-            <TypeIcon className="w-5 h-5" />
+            <TypeIcon className="w-6 h-6" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-              <h3 className="font-semibold text-forest-deep text-base truncate">
+            <div className="flex items-center gap-2 mb-1">
+              <h3 className="font-bold text-forest-deep text-base truncate">
                 {keep.title}
               </h3>
               <Badge
-                className={`${statusConfig.color} text-[10px] px-2 py-0 font-medium border`}
+                className={`${statusConfig.color} text-xs px-2 py-0.5 font-medium`}
               >
                 {statusConfig.label}
               </Badge>
@@ -188,15 +185,16 @@ export function KeepCard({
               </p>
             )}
 
+            {/* Error State */}
             {keep.ipfsError && (
-              <div className="mt-2 p-3 bg-destructive/5 border border-destructive/20 rounded-xl">
+              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-xl">
                 <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-destructive flex-shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-4 h-4 text-red-600 flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground font-medium mb-1">
-                      Content unavailable
+                    <p className="text-sm text-red-800 font-medium mb-1">
+                      Content Unavailable
                     </p>
-                    <p className="text-xs text-muted-foreground mb-2">
+                    <p className="text-xs text-red-600 mb-2">
                       {keep.errorMessage ||
                         "Failed to retrieve content from IPFS"}
                     </p>
@@ -208,7 +206,7 @@ export function KeepCard({
                         }}
                         size="sm"
                         variant="outline"
-                        className="text-xs h-7 border-destructive/30 text-destructive hover:bg-destructive/5"
+                        className="text-xs px-3 py-1 h-7 border-red-300 text-red-700 hover:bg-red-100"
                       >
                         Retry
                       </Button>
@@ -218,16 +216,19 @@ export function KeepCard({
               </div>
             )}
 
-            <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <div className="flex items-center gap-2 mt-1">
               <Badge
                 variant="secondary"
-                className={`text-[10px] px-2 py-0 ${typeConfig.color} border-none`}
+                className={`text-xs px-2 py-0.5 ${typeConfig.color} border-none`}
               >
                 {typeConfig.label}
               </Badge>
 
               {isExpired && keep.status === "active" && (
-                <Badge className="text-[10px] px-2 py-0 bg-warning/15 text-warning border-transparent">
+                <Badge
+                  variant="destructive"
+                  className="text-xs px-2 py-0.5 animate-pulse"
+                >
                   <AlertTriangle className="w-3 h-3 mr-1" />
                   Ready
                 </Badge>
@@ -236,7 +237,8 @@ export function KeepCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        {/* Actions */}
+        <div className="flex items-center gap-2">
           {isCreator && (
             <Button
               onClick={(e) => {
@@ -244,8 +246,7 @@ export function KeepCard({
                 onReveal?.(keep);
               }}
               size="sm"
-              variant="outline"
-              className="text-xs h-8 px-2.5 rounded-lg border-border"
+              className="btn-native text-xs px-3 py-2 h-8 bg-blue-500 hover:bg-blue-600"
             >
               Reveal
             </Button>
@@ -258,7 +259,7 @@ export function KeepCard({
                 onClaim?.(keep);
               }}
               size="sm"
-              className="btn-keepr text-xs h-8 px-2.5 py-0"
+              className="btn-native text-xs px-3 py-2 h-8"
             >
               Claim
             </Button>
@@ -270,26 +271,25 @@ export function KeepCard({
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="touch-target w-8 h-8 p-0 hover:bg-secondary rounded-lg"
+                  className="touch-target w-8 h-8 p-0 hover:bg-forest-deep/5 rounded-xl"
                   onClick={(e) => e.stopPropagation()}
-                  aria-label="Keep actions"
                 >
                   <MoreVertical className="w-4 h-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="bg-card border border-border shadow-soft rounded-xl"
+                className="card-native border-none shadow-2xl"
               >
                 <DropdownMenuItem
                   onClick={(e) => {
                     e.stopPropagation();
                     onView?.(keep);
                   }}
-                  className="rounded-lg"
+                  className="rounded-xl"
                 >
                   <Eye className="w-4 h-4 mr-3" />
-                  View details
+                  View Details
                 </DropdownMenuItem>
 
                 {keep.status === "active" && (
@@ -298,10 +298,10 @@ export function KeepCard({
                       e.stopPropagation();
                       onEdit?.(keep);
                     }}
-                    className="rounded-lg"
+                    className="rounded-xl"
                   >
                     <Edit className="w-4 h-4 mr-3" />
-                    Edit keep
+                    Edit Keep
                   </DropdownMenuItem>
                 )}
 
@@ -311,10 +311,10 @@ export function KeepCard({
                       e.stopPropagation();
                       onClaim?.(keep);
                     }}
-                    className="text-emerald-touch focus:text-emerald-touch rounded-lg"
+                    className="text-emerald-touch focus:text-emerald-touch rounded-xl"
                   >
                     <Shield className="w-4 h-4 mr-3" />
-                    Claim keep
+                    Claim Keep
                   </DropdownMenuItem>
                 )}
 
@@ -324,41 +324,46 @@ export function KeepCard({
                       e.stopPropagation();
                       onCancel?.(keep);
                     }}
-                    className="text-destructive focus:text-destructive rounded-lg"
+                    className="text-destructive focus:text-destructive rounded-xl"
                   >
                     <Trash2 className="w-4 h-4 mr-3" />
-                    Cancel keep
+                    Cancel Keep
                   </DropdownMenuItem>
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
           )}
 
-          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-forest-deep transition-colors hidden sm:block" />
+          <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-forest-deep transition-colors" />
         </div>
       </div>
 
-      <div className="space-y-2.5 pt-1 border-t border-border/60">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0 pt-2.5">
-          <User className="w-4 h-4 flex-shrink-0" />
-          <span className="font-medium shrink-0">Recipient</span>
-          <code className="bg-secondary px-2 py-0.5 rounded-md text-xs font-mono truncate text-foreground">
-            {keep.recipient.slice(0, 6)}...{keep.recipient.slice(-4)}
-          </code>
+      {/* Content */}
+      <div className="space-y-3">
+        {/* Recipient Info */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground min-w-0 flex-1">
+            <User className="w-4 h-4 flex-shrink-0" />
+            <span className="font-medium">Recipient:</span>
+            <code className="bg-mist-green px-2 py-1 rounded-lg text-xs font-mono truncate">
+              {keep.recipient.slice(0, 6)}...{keep.recipient.slice(-4)}
+            </code>
+          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2">
+        {/* Timing Info */}
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Clock className="w-4 h-4 flex-shrink-0" />
             <span className="font-medium">
-              {isExpired ? "Unlocked" : "Unlocks"}
+              {isExpired ? "Unlocked" : "Unlocks"}:
             </span>
           </div>
 
           <div className="text-right">
             <p
               className={`font-semibold text-sm ${
-                isExpired ? "text-warning" : "text-forest-deep"
+                isExpired ? "text-yellow-600" : "text-forest-deep"
               }`}
             >
               {isValidUnlockTime
@@ -369,7 +374,7 @@ export function KeepCard({
             </p>
 
             {isExpired && keep.status === "active" && (
-              <div className="flex items-center justify-end gap-1 text-warning text-xs mt-0.5">
+              <div className="flex items-center gap-1 text-yellow-600 text-xs mt-1">
                 <AlertTriangle className="w-3 h-3" />
                 <span>Available to claim</span>
               </div>
@@ -377,17 +382,18 @@ export function KeepCard({
           </div>
         </div>
 
+        {/* Quick Action for Claimable Keeps */}
         {canClaim && !compact && (
           <Button
             onClick={(e) => {
               e.stopPropagation();
               onClaim?.(keep);
             }}
-            className="w-full btn-keepr mt-2"
+            className="w-full btn-native mt-4 flex items-center justify-center gap-2"
             size="sm"
           >
             <Shield className="w-4 h-4" />
-            Claim this keep
+            Claim This Keep
           </Button>
         )}
       </div>

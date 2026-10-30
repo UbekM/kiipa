@@ -20,7 +20,7 @@
     <!-- SEO and Description -->
     <meta
       name="description"
-      content="Keepr — Encrypted keeps for the people you trust. Decentralized digital inheritance on Lisk."
+      content="Keepr - Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage on blockchain."
     />
     <meta
       name="keywords"
@@ -31,10 +31,10 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://keepr.app/" />
-    <meta property="og:title" content="Keepr — Encrypted keeps for the people you trust" />
+    <meta property="og:title" content="Keepr - Secure Your Digital Legacy" />
     <meta
       property="og:description"
-      content="Decentralized digital inheritance. Encrypt secrets on-device, store on IPFS, settle on Lisk."
+      content="Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage."
     />
     <meta property="og:image" content="/keepr-512.png" />
 
@@ -43,11 +43,11 @@
     <meta property="twitter:url" content="https://keepr.app/" />
     <meta
       property="twitter:title"
-      content="Keepr — Encrypted keeps for the people you trust"
+      content="Keepr - Secure Your Digital Legacy"
     />
     <meta
       property="twitter:description"
-      content="Decentralized digital inheritance. Encrypt secrets on-device, store on IPFS, settle on Lisk."
+      content="Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage."
     />
     <meta property="twitter:image" content="/keepr-512.png" />
 
@@ -61,10 +61,11 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/keepr-icon.svg" />
     <link rel="shortcut icon" href="/keepr-icon.svg" />
 
+    <!-- Space Grotesk Font - Optimized Loading -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
 
@@ -129,42 +130,54 @@
     <link rel="dns-prefetch" href="//fonts.googleapis.com" />
     <link rel="dns-prefetch" href="//fonts.gstatic.com" />
 
-    <title>Keepr — Encrypted keeps for the people you trust</title>
+    <title>Keepr - Secure Your Digital Legacy</title>
 
+    <!-- Critical CSS to prevent FOUC -->
     <style>
+      /* Critical loading styles */
       #root {
         display: flex;
         flex-direction: column;
         min-height: 100vh;
         min-height: -webkit-fill-available;
-        background: #f5faf7;
+        background: linear-gradient(135deg, #eaf5ef 0%, #ffffff 100%);
       }
 
+      /* Loading spinner */
       .loading-spinner {
         position: fixed;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        width: 36px;
-        height: 36px;
-        border: 3px solid #dcebe3;
+        width: 40px;
+        height: 40px;
+        border: 3px solid #eaf5ef;
         border-top: 3px solid #00473e;
         border-radius: 50%;
-        animation: spin 0.9s linear infinite;
+        animation: spin 1s linear infinite;
       }
 
       @keyframes spin {
-        to {
+        0% {
+          transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
           transform: translate(-50%, -50%) rotate(360deg);
         }
       }
 
+      /* Hide loading when React loads */
       #root:not(:empty) .loading-spinner {
         display: none;
       }
 
+      /* Prevent flash of unstyled content */
       body {
-        font-family: "Space Grotesk", system-ui, sans-serif;
+        font-family:
+          "Space Grotesk",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
         margin: 0;
         padding: 0;
         overflow-x: hidden;
@@ -172,10 +185,9 @@
         -moz-osx-font-smoothing: grayscale;
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
-        background: #f5faf7;
-        color: #0d1f1a;
       }
 
+      /* Safe area support */
       @supports (padding: max(0px)) {
         body {
           padding-left: env(safe-area-inset-left);

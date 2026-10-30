@@ -278,7 +278,7 @@ const Documentation = () => {
   return (
     <div className="bg-gradient-to-br pb-14 from-gray-50 via-white to-blue-50">
       {/* Header */}
-      <header className="mobile-header sticky top-0 z-50">
+      <header className="border-b border-forest-deep/5 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-3">
@@ -292,7 +292,7 @@ const Documentation = () => {
               </Button>
               <div className="flex items-center gap-2">
                 <BookOpen className="w-6 h-6 text-forest-deep" />
-                <h1 className="font-display text-xl text-forest-deep">
+                <h1 className="text-xl font-bold text-forest-deep">
                   Documentation
                 </h1>
               </div>
@@ -309,12 +309,13 @@ const Documentation = () => {
             <Star className="w-4 h-4" />
             Digital Legacy Protocol
           </div>
-          <h1 className="font-display text-display-md sm:text-display-lg text-forest-deep mb-4">
-            Keepr documentation
+          <h1 className="text-4xl font-bold text-forest-deep mb-4">
+            Welcome to Keepr Documentation
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-            Encrypted keeps for the people you trust — how to create, claim, and
-            secure your digital legacy on Lisk.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
+            Learn how to secure your digital legacy with Keepr's decentralized,
+            encrypted storage solution. From basic usage to advanced security
+            features, find everything you need to know here.
           </p>
           <div className="flex items-center justify-center gap-4">
             <Button

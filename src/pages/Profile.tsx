@@ -272,41 +272,40 @@ export default function Profile() {
   };
 
   return (
-    <div className="min-h-screen page-shell pb-16">
-      <header className="mobile-header">
-        <div className="mobile-padding py-3.5">
+    <div className=" bg-white">
+      {/* Header */}
+      <header className="border-b border-forest-deep/10 bg-white/50 backdrop-blur-sm">
+        <div className="mobile-padding py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="text-forest-deep hover:bg-secondary rounded-xl touch-target"
-                aria-label="Back to dashboard"
+                className="text-forest-deep"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex items-center gap-2">
                 <Settings className="w-5 h-5 text-forest-deep" />
-                <h1 className="font-display text-lg text-forest-deep">
-                  Profile & settings
+                <h1 className="text-lg font-bold text-forest-deep">
+                  Profile & Settings
                 </h1>
               </div>
             </div>
           </div>
         </div>
       </header>
-      <div className="mobile-padding pt-4">
-        <WalletConnection />
-      </div>
+      <WalletConnection />
 
-      <main className="mobile-padding mobile-section">
-        <div className="max-w-2xl mx-auto space-y-5">
-          <Card>
+      <main className="mobile-padding mobile-section mt-14">
+        <div className="max-w-2xl mx-auto space-y-6">
+          {/* Profile Info */}
+          <Card className="border-forest-deep/10">
             <CardHeader>
-              <CardTitle className="font-display text-xl text-forest-deep flex items-center gap-2">
+              <CardTitle className="text-forest-deep flex items-center gap-2">
                 <User className="w-5 h-5" />
-                Profile information
+                Profile Information
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

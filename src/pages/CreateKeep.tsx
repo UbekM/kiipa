@@ -640,33 +640,31 @@ export default function CreateKeep() {
   };
 
   return (
-    <div className="min-h-screen page-shell pb-16">
-      <header className="mobile-header">
-        <div className="mobile-padding py-3.5">
+    <div className=" bg-white">
+      {/* Header */}
+      <header className="border-b border-forest-deep/5 bg-white/90 backdrop-blur-sm">
+        <div className="mobile-padding py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="text-forest-deep hover:bg-secondary rounded-xl touch-target"
-                aria-label="Back to dashboard"
+                className="text-forest-deep"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-forest-deep" />
-                <h1 className="font-display text-lg text-forest-deep">
-                  Create keep
+                <h1 className="text-lg font-bold text-forest-deep">
+                  Create Keep
                 </h1>
               </div>
             </div>
           </div>
         </div>
       </header>
-      <div className="mobile-padding pt-4">
-        <WalletConnection />
-      </div>
+      <WalletConnection />
 
       {/* Balance and Network Status */}
       {/* {address && (
@@ -724,17 +722,17 @@ export default function CreateKeep() {
         </div>
       )} */}
 
-      <main className="mobile-padding mobile-section">
-        <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-5">
-          <Card className="mb-0">
+      <main className="mobile-padding mobile-section mt-14">
+        <form onSubmit={handleSubmit} className="max-w-2xl mx-auto">
+          <Card className="border-forest-deep/10 mb-6 my-6">
             <CardHeader>
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="font-display text-xl text-forest-deep">
-                    Keep details
+                  <CardTitle className="text-forest-deep">
+                    Keep Details
                   </CardTitle>
                   <CardDescription>
-                    Basic information for your encrypted keep
+                    Set up the basic information for your Keep
                   </CardDescription>
                 </div>
                 <div className="w-12 h-12 rounded-xl flex items-center justify-center">
@@ -844,12 +842,12 @@ export default function CreateKeep() {
             </CardContent>
           </Card>
 
-          <Card className="mb-0">
+          <Card className="border-forest-deep/10 mb-6">
             <CardHeader>
-              <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="font-display text-xl text-forest-deep">
-                    Keep content
+                  <CardTitle className="text-forest-deep">
+                    Keep Content
                   </CardTitle>
                   <CardDescription>
                     Add the content you want to secure
@@ -857,9 +855,9 @@ export default function CreateKeep() {
                 </div>
                 <Badge
                   variant="outline"
-                  className="bg-secondary text-forest-deep border-transparent"
+                  className="bg-emerald-touch/10 text-emerald-touch border-emerald-touch/20"
                 >
-                  End-to-end encrypted
+                  End-to-end Encrypted
                 </Badge>
               </div>
             </CardHeader>
@@ -947,21 +945,18 @@ export default function CreateKeep() {
                 </div>
               </div>
 
-              <p className="text-sm text-muted-foreground bg-secondary/80 p-3 rounded-xl leading-relaxed">
-                Your content is encrypted on-device before IPFS storage — only
-                authorized recipients can unlock it.
+              <p className="text-sm text-muted-foreground bg-white p-3 rounded-lg">
+                🔒 Your content will be encrypted before being stored on IPFS,
+                ensuring only authorized recipients can access it
               </p>
             </CardContent>
           </Card>
 
-          <Card className="mb-0">
+          <Card className="border-forest-deep/10 mb-6">
             <CardHeader>
-              <CardTitle className="font-display text-xl text-forest-deep">
-                Recipients & timing
+              <CardTitle className="text-forest-deep">
+                Recipients & Timing
               </CardTitle>
-              <CardDescription>
-                Who can claim, and when the keep unlocks
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">

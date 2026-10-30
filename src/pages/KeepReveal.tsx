@@ -317,7 +317,7 @@ export default function KeepReveal() {
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <h1 className="font-display text-lg text-forest-deep">Reveal Keep</h1>
+            <h1 className="text-lg font-bold text-forest-deep">Reveal Keep</h1>
           </div>
 
           <Card className="border-red-200 bg-red-50">
@@ -348,7 +348,7 @@ export default function KeepReveal() {
             >
               <ArrowLeft className="w-4 h-4" />
             </Button>
-            <h1 className="font-display text-lg text-forest-deep">Reveal Keep</h1>
+            <h1 className="text-lg font-bold text-forest-deep">Reveal Keep</h1>
           </div>
 
           <Card className="border-forest-deep/10">
@@ -382,7 +382,7 @@ export default function KeepReveal() {
               </Button>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-forest-deep" />
-                <h1 className="font-display text-lg text-forest-deep">
+                <h1 className="text-lg font-bold text-forest-deep">
                   Reveal Keep
                 </h1>
               </div>

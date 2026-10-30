@@ -54,7 +54,7 @@ const FallbackClaim = () => {
                 </Button>
                 <div className="flex items-center gap-2">
                   <Shield className="w-5 h-5 text-forest-deep" />
-                  <h1 className="font-display text-lg text-forest-deep">
+                  <h1 className="text-lg font-bold text-forest-deep">
                     Fallback & Claim
                   </h1>
                 </div>

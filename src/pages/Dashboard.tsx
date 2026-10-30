@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import {
@@ -13,19 +14,36 @@ import {
   AlertTriangle,
   Bell,
   Settings,
+  TrendingUp,
   Archive,
+  Users,
+  Menu,
+  Zap,
+  Star,
+  ArrowRight,
   Filter,
   Info,
-  Power,
 } from "lucide-react";
 import { WalletConnection } from "@/components/wallet/WalletConnection";
 import { KeepCard, Keep } from "@/components/keepr/KeepCard";
-import { useWeb3ModalAccount, useWeb3Modal } from "@web3modal/ethers/react";
+import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { InstallPrompt } from "@/components/keepr/InstallPrompt";
 import { useKeeps } from "@/hooks/useKeeps";
 import { useKeeprContract, BlockchainKeep } from "@/hooks/useKeeprContract";
 import { useUserSettings } from "@/hooks/useUserSettings";
 import { KEEP_STATUS, KEEP_TYPE } from "@/lib/contracts";
+import {
+  useWeb3Modal,
+  useWeb3ModalProvider,
+} from "@web3modal/ethers/react";
+import {
+  Wallet,
+  ChevronDown,
+  Copy,
+  ExternalLink,
+  Power,
+  RefreshCw,
+} from "lucide-react";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -37,6 +55,7 @@ export default function Dashboard() {
     error,
     failedKeeps,
     pinataAvailable,
+    searchKeeps,
     refreshKeeps,
     retryKeep,
   } = useKeeps();
@@ -55,6 +74,7 @@ export default function Dashboard() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState("active");
+  const [showSearch, setShowSearch] = useState(false);
   const [blockchainKeeps, setBlockchainKeeps] = useState<BlockchainKeep[]>([]);
   const [blockchainLoading, setBlockchainLoading] = useState(false);
   const { open } = useWeb3Modal();
@@ -258,17 +278,13 @@ export default function Dashboard() {
   // Only show error screen for non-Pinata related errors
   if (error && !error.includes("Pinata")) {
     return (
-      <div className="empty-state min-h-screen page-shell">
-        <div className="empty-state-icon bg-destructive/10 text-destructive">
-          <AlertTriangle className="w-8 h-8" />
-        </div>
-        <h2 className="font-display text-xl text-forest-deep mb-2">
-          Couldn&apos;t load keeps
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <AlertTriangle className="w-12 h-12 text-red-500 mb-4" />
+        <h2 className="text-xl font-bold text-forest-deep mb-2">
+          Error Loading Keeps
         </h2>
-        <p className="text-muted-foreground mb-6 max-w-sm text-sm">{error}</p>
-        <Button onClick={refreshKeeps} className="btn-keepr">
-          Try again
-        </Button>
+        <p className="text-muted-foreground mb-4">{error}</p>
+        <Button onClick={refreshKeeps}>Try Again</Button>
       </div>
     );
   }
@@ -276,31 +292,30 @@ export default function Dashboard() {
   return (
     <div className="app-container">
       <InstallPrompt />
-      <div className="mobile-page mb-14 page-shell">
+      <div className="mobile-page mb-12">
+        {/* Native-style header */}
         <div className="mobile-header">
           <div className="mobile-spacing-tight">
-            <div className="flex items-center justify-between mb-4 gap-2">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="brand-mark shrink-0">
-                  <Shield className="w-5 h-5 text-white" />
+            {/* Top header row */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-forest-deep to-pine-fade rounded-2xl flex items-center justify-center shadow-lg">
+                  <Shield className="w-6 h-6 text-white" />
                 </div>
-                <div className="min-w-0">
-                  <h1 className="font-display text-xl text-forest-deep leading-tight">
-                    Keepr
-                  </h1>
-                  <p className="text-xs text-muted-foreground truncate">
-                    Digital legacy manager
+                <div>
+                  <h1 className="text-xl font-bold text-forest-deep">Kiipa</h1>
+                  <p className="text-xs text-muted-foreground">
+                    Digital Legacy Manager
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-1 shrink-0">
+              <div className="flex items-center justify-center gap-2">
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="touch-target text-forest-deep hover:bg-forest-deep/5 rounded-xl"
+                  className="touch-target text-forest-deep hover:bg-forest-deep rounded-xl relative"
                   onClick={() => navigate("/profile")}
-                  aria-label="Settings"
                 >
                   <Settings className="w-5 h-5" />
                 </Button>
@@ -308,126 +323,127 @@ export default function Dashboard() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="touch-target text-forest-deep hover:bg-forest-deep/5 rounded-xl relative"
-                  aria-label="Notifications"
+                  className="touch-target text-forest-deep hover:bg-forest-deep rounded-xl relative"
                 >
                   <Bell className="w-5 h-5" />
                   {stats.claimable > 0 && (
-                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
                 </Button>
                 <Button
                   onClick={() => open()}
-                  variant="outline"
-                  size="sm"
-                  className="hidden xs:flex sm:flex border-border text-muted-foreground hover:text-destructive hover:border-destructive/40 hover:bg-destructive/5 gap-1.5 rounded-xl px-3"
+                  className="w-full bg-red-600 hover:bg-red-700 text-white flex items-center gap-2"
                 >
-                  <Power className="w-4 h-4" />
-                  <span className="sr-only sm:not-sr-only sm:inline">
-                    Disconnect
-                  </span>
+                  <Power className="w-4 h-4" /> Disconnect
                 </Button>
               </div>
             </div>
 
+            {/* Wallet connection */}
             <div className="mb-4 w-full">
               <WalletConnection />
             </div>
 
+            {/* Welcome message */}
             <div className="mb-1">
-              <h2 className="font-display text-lg sm:text-xl text-forest-deep mb-1">
+              <h2 className="text-xl font-bold text-forest-deep mb-1">
                 {settingsLoading ? (
                   <span className="flex items-center gap-2">
-                    Welcome back
+                    Welcome back! 👋
                     <div className="w-4 h-4 border-2 border-forest-deep/20 border-t-forest-deep rounded-full animate-spin" />
                   </span>
                 ) : (
-                  `Welcome back, ${getDisplayName()}`
+                  `Welcome back, ${getDisplayName()}! 👋`
                 )}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Manage your keeps and secure your digital legacy
+                Manage your Keeps and secure your digital legacy
               </p>
             </div>
           </div>
         </div>
 
+        {/* Content */}
         <div className="mobile-content">
           <div className="mobile-spacing">
+            {/* Statistics Cards */}
             <div className="grid grid-cols-2 gap-3 mb-6">
-              <div className="stat-tile">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center">
+              <div className="card-native p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-forest-deep/10 rounded-xl flex items-center justify-center">
                     <Archive className="w-4 h-4 text-forest-deep" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Total
+                  <span className="text-sm font-semibold text-forest-deep">
+                    Total Keeps
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-forest-deep tabular-nums">
+                <div className="text-3xl font-bold text-forest-deep">
                   {loading ? (
-                    <div className="h-7 bg-muted rounded-md animate-pulse w-10" />
+                    <div className="h-8 bg-forest-deep/10 rounded animate-pulse w-12"></div>
                   ) : (
                     stats.total
                   )}
                 </div>
               </div>
 
-              <div className="stat-tile">
-                <div className="flex items-center gap-2.5 mb-2">
+              <div className="card-native p-4">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="w-8 h-8 bg-emerald-touch/10 rounded-xl flex items-center justify-center">
                     <Clock className="w-4 h-4 text-emerald-touch" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  <span className="text-sm font-semibold text-emerald-touch">
                     Active
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-emerald-touch tabular-nums">
+                <div className="text-3xl font-bold text-emerald-touch">
                   {loading ? (
-                    <div className="h-7 bg-muted rounded-md animate-pulse w-10" />
+                    <div className="h-8 bg-emerald-touch/10 rounded animate-pulse w-12"></div>
                   ) : (
                     stats.active
                   )}
                 </div>
               </div>
 
-              <div className="stat-tile">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 bg-warning/10 rounded-xl flex items-center justify-center">
-                    <AlertTriangle className="w-4 h-4 text-warning" />
+              <div className="card-native p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-yellow-500/10 rounded-xl flex items-center justify-center">
+                    <AlertTriangle className="w-4 h-4 text-yellow-600" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                    Ready
+                  <span className="text-sm font-semibold text-yellow-600">
+                    Claimable
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="text-2xl font-semibold text-warning tabular-nums">
+                  <div className="text-3xl font-bold text-yellow-600">
                     {loading ? (
-                      <div className="h-7 bg-muted rounded-md animate-pulse w-10" />
+                      <div className="h-8 bg-yellow-500/10 rounded animate-pulse w-12"></div>
                     ) : (
                       stats.claimable
                     )}
                   </div>
                   {!loading && stats.claimable > 0 && (
-                    <Badge className="text-xs px-1.5 py-0 h-5 bg-warning/15 text-warning border-transparent">
+                    <Badge
+                      variant="destructive"
+                      className="text-xs px-1.5 py-0.5 h-5"
+                    >
                       New
                     </Badge>
                   )}
                 </div>
               </div>
 
-              <div className="stat-tile">
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center">
-                    <CheckCircle className="w-4 h-4 text-forest-deep" />
+              <div className="card-native p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                    <CheckCircle className="w-4 h-4 text-blue-600" />
                   </div>
-                  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                  <span className="text-sm font-semibold text-blue-600">
                     Claimed
                   </span>
                 </div>
-                <div className="text-2xl font-semibold text-forest-deep tabular-nums">
+                <div className="text-3xl font-bold text-blue-600">
                   {loading ? (
-                    <div className="h-7 bg-muted rounded-md animate-pulse w-10" />
+                    <div className="h-8 bg-blue-500/10 rounded animate-pulse w-12"></div>
                   ) : (
                     stats.claimed
                   )}
@@ -435,180 +451,182 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="flex items-center gap-3 mb-5">
+            {/* Search and Filter */}
+            <div className="flex items-center gap-3 mb-6">
               <div className="flex-1 relative">
                 <Input
                   placeholder="Search keeps..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 bg-card border-border rounded-xl h-11"
-                  aria-label="Search keeps"
+                  className="pl-10 bg-white/60 backdrop-blur-md rounded-xl"
                 />
-                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Search className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
               </div>
               <Button
                 variant="outline"
                 size="icon"
-                className="shrink-0 h-11 w-11 border-border rounded-xl"
-                aria-label="Filter"
+                className="shrink-0 border-forest-deep/20"
               >
                 <Filter className="w-4 h-4" />
               </Button>
             </div>
 
+            {/* Tabs */}
             <Tabs
               defaultValue="active"
               value={selectedTab}
               onValueChange={setSelectedTab}
-              className="mb-5"
+              className="mb-6"
             >
-              <TabsList className="grid grid-cols-4 w-full bg-secondary/80 p-1 h-auto rounded-xl gap-0.5">
+              <TabsList className="grid grid-cols-4 bg-transparent gap-2">
                 <TabsTrigger
                   value="active"
-                  className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:text-forest-deep data-[state=active]:shadow-sm"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   Active
                 </TabsTrigger>
                 <TabsTrigger
                   value="claimable"
-                  className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:text-forest-deep data-[state=active]:shadow-sm"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   Ready
                 </TabsTrigger>
                 <TabsTrigger
                   value="claimed"
-                  className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:text-forest-deep data-[state=active]:shadow-sm"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   Claimed
                 </TabsTrigger>
                 <TabsTrigger
                   value="all"
-                  className="rounded-lg text-xs sm:text-sm data-[state=active]:bg-card data-[state=active]:text-forest-deep data-[state=active]:shadow-sm"
+                  className="bg-white data-[state=active]:bg-forest-deep data-[state=active]:text-white"
                 >
                   All
                 </TabsTrigger>
               </TabsList>
             </Tabs>
 
+            {/* Failed Keeps Warning */}
             {failedKeeps.length > 0 && (
-              <div className="mb-5 p-4 bg-warning/10 border border-warning/25 rounded-2xl">
+              <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm mb-1">
-                      Some keeps couldn&apos;t be loaded
+                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-yellow-800 text-sm mb-1">
+                      Some keeps couldn't be loaded
                     </p>
-                    <p className="text-muted-foreground text-xs mb-3">
+                    <p className="text-yellow-700 text-xs mb-3">
                       {failedKeeps.length} keep
                       {failedKeeps.length > 1 ? "s" : ""} failed to load from
-                      IPFS. Retry individually or refresh all.
+                      IPFS. You can retry loading them individually or refresh
+                      all keeps.
                     </p>
-                    <Button
-                      onClick={refreshKeeps}
-                      size="sm"
-                      variant="outline"
-                      className="text-xs h-8 border-warning/40 text-foreground hover:bg-warning/10"
-                    >
-                      Refresh all
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={refreshKeeps}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-3 py-1 h-7 border-yellow-300 text-yellow-700 hover:bg-yellow-100"
+                      >
+                        Refresh All
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Pinata Unavailable Warning */}
             {!pinataAvailable && (
-              <div className="mb-5 p-4 bg-secondary border border-border rounded-2xl">
+              <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-2xl">
                 <div className="flex items-start gap-3">
-                  <Info className="w-5 h-5 text-emerald-touch flex-shrink-0 mt-0.5" />
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-foreground text-sm mb-1">
-                      IPFS storage unavailable
+                  <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="font-semibold text-blue-800 text-sm mb-1">
+                      IPFS Storage Unavailable
                     </p>
-                    <p className="text-muted-foreground text-xs mb-3">
-                      You can still create keeps; they&apos;ll sync when storage
-                      returns.
+                    <p className="text-blue-700 text-xs mb-3">
+                      Your keeps are stored on IPFS but the storage service is
+                      currently unavailable. You can still create new keeps, and
+                      they will be stored once the service is restored.
                     </p>
-                    <Button
-                      onClick={refreshKeeps}
-                      size="sm"
-                      className="text-xs h-8 btn-keepr"
-                    >
-                      Retry connection
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={refreshKeeps}
+                        size="sm"
+                        variant="outline"
+                        className="text-xs px-3 py-1 h-7 border-blue-300 text-white hover:bg-blue-900 bg-blue-800"
+                      >
+                        Retry Connection
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="space-y-3 pb-20">
+            {/* Keeps List */}
+            <div className="space-y-4">
               {loading ? (
-                <div className="space-y-3" aria-busy="true" aria-label="Loading keeps">
+                <div className="space-y-4">
+                  {/* Skeleton loading cards */}
                   {[1, 2, 3].map((i) => (
-                    <div key={i} className="card-keepr p-4">
+                    <div key={i} className="card-native p-4 animate-pulse">
                       <div className="flex items-start gap-3">
-                        <div className="w-11 h-11 bg-muted rounded-xl flex-shrink-0 shimmer" />
-                        <div className="flex-1 space-y-2.5 pt-0.5">
-                          <div className="h-4 bg-muted rounded-md w-3/4 shimmer" />
-                          <div className="h-3 bg-muted rounded-md w-1/2 shimmer" />
+                        <div className="w-12 h-12 bg-forest-deep/10 rounded-xl flex-shrink-0"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-forest-deep/10 rounded w-3/4"></div>
+                          <div className="h-3 bg-forest-deep/10 rounded w-1/2"></div>
                           <div className="flex gap-2">
-                            <div className="h-5 bg-muted rounded-md w-14 shimmer" />
-                            <div className="h-5 bg-muted rounded-md w-16 shimmer" />
+                            <div className="h-6 bg-forest-deep/10 rounded w-16"></div>
+                            <div className="h-6 bg-forest-deep/10 rounded w-20"></div>
                           </div>
                         </div>
                       </div>
                     </div>
                   ))}
-                  <p className="text-center text-muted-foreground text-sm pt-2">
-                    Loading your keeps…
-                  </p>
+                  <div className="text-center py-4">
+                    <p className="text-muted-foreground text-sm">
+                      Loading your keeps...
+                    </p>
+                  </div>
                 </div>
               ) : filteredKeeps.length === 0 ? (
-                <div className="empty-state py-10">
+                <div className="text-center py-8">
                   {!pinataAvailable ? (
-                    <>
-                      <div className="empty-state-icon">
-                        <Shield className="w-7 h-7" />
+                    <div className="space-y-3">
+                      <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
+                        <Shield className="w-8 h-8 text-blue-600" />
                       </div>
-                      <p className="font-display text-lg text-forest-deep mb-1">
-                        No keeps available
-                      </p>
-                      <p className="text-muted-foreground text-sm max-w-xs">
-                        IPFS storage is temporarily unavailable. You can still
-                        create a new keep.
-                      </p>
-                    </>
+                      <div>
+                        <p className="text-forest-deep font-semibold mb-1">
+                          No Keeps Available
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          IPFS storage is currently unavailable. You can still
+                          create new keeps.
+                        </p>
+                      </div>
+                    </div>
                   ) : keeps.length === 0 ? (
-                    <>
-                      <div className="empty-state-icon">
-                        <Shield className="w-7 h-7" />
+                    <div className="space-y-3">
+                      <div className="w-16 h-16 bg-forest-deep/10 rounded-full flex items-center justify-center mx-auto">
+                        <Shield className="w-8 h-8 text-forest-deep" />
                       </div>
-                      <p className="font-display text-lg text-forest-deep mb-1">
-                        No keeps yet
-                      </p>
-                      <p className="text-muted-foreground text-sm max-w-xs mb-5">
-                        Create your first keep to begin secure digital
-                        inheritance.
-                      </p>
-                      <Button
-                        className="btn-keepr"
-                        onClick={() => navigate("/create")}
-                      >
-                        <Plus className="w-4 h-4" />
-                        Create a keep
-                      </Button>
-                    </>
+                      <div>
+                        <p className="text-forest-deep font-semibold mb-1">
+                          No Keeps Yet
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          Create your first keep to get started with secure
+                          digital inheritance.
+                        </p>
+                      </div>
+                    </div>
                   ) : (
-                    <>
-                      <div className="empty-state-icon">
-                        <Search className="w-7 h-7" />
-                      </div>
-                      <p className="font-display text-lg text-forest-deep mb-1">
-                        No matches
-                      </p>
-                      <p className="text-muted-foreground text-sm">
-                        No keeps match your search or filter.
-                      </p>
-                    </>
+                    <p className="text-muted-foreground">
+                      No keeps match your search criteria
+                    </p>
                   )}
                 </div>
               ) : (
@@ -628,14 +646,16 @@ export default function Dashboard() {
               )}
             </div>
 
-            <Button
-              size="lg"
-              className="fab"
-              onClick={() => navigate("/create")}
-              aria-label="Create keep"
-            >
-              <Plus className="w-6 h-6" />
-            </Button>
+            {/* Create Keep Button */}
+            <div className="fixed bottom-8 right-8">
+              <Button
+                size="lg"
+                className="btn-keepr h-14 w-14 rounded-full shadow-lg"
+                onClick={() => navigate("/create")}
+              >
+                <Plus className="w-6 h-6" />
+              </Button>
+            </div>
           </div>
         </div>
       </div>

@@ -1,36 +1,33 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Space+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Keepr — calm forest palette for inheritance / security */
-    --background: 152 28% 97%;
-    --foreground: 168 42% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 168 42% 10%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 168 42% 10%;
-    --primary: 172 100% 14%; /* Forest Deep #00473E */
-    --primary-foreground: 152 35% 96%;
-    --secondary: 160 28% 92%;
-    --secondary-foreground: 172 80% 16%;
-    --muted: 152 18% 93%;
-    --muted-foreground: 168 12% 38%;
-    --accent: 162 40% 36%; /* Emerald Touch */
-    --accent-foreground: 152 35% 96%;
-    --destructive: 0 72% 51%;
+    /* Keepr brand colors in HSL */
+    --background: 155 60% 94%; /* #EAF5EF - Mist Green */
+    --foreground: 162 30% 9%; /* #0D1F1A - Ink Green */
+    --card: 155 60% 94%;
+    --card-foreground: 162 30% 9%;
+    --popover: 155 60% 94%;
+    --popover-foreground: 162 30% 9%;
+    --primary: 172 100% 14%; /* #00473E - Forest Deep */
+    --primary-foreground: 155 60% 94%;
+    --secondary: 160 73% 22%; /* #0A5F4A - Pine Fade */
+    --secondary-foreground: 155 60% 94%;
+    --muted: 160 30% 85%;
+    --muted-foreground: 162 30% 25%;
+    --accent: 162 46% 34%; /* #2F7F6D - Emerald Touch */
+    --accent-foreground: 155 60% 94%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 160 16% 86%;
-    --input: 160 16% 86%;
+    --border: 160 30% 80%;
+    --input: 160 30% 80%;
     --ring: 172 100% 14%;
-    --radius: 0.875rem;
-    --surface: 152 35% 96%;
-    --surface-elevated: 0 0% 100%;
-    --success: 158 45% 36%;
-    --warning: 38 85% 42%;
+    --radius: 1rem;
 
+    /* Native app specific variables */
     --safe-area-inset-top: env(safe-area-inset-top);
     --safe-area-inset-bottom: env(safe-area-inset-bottom);
     --safe-area-inset-left: env(safe-area-inset-left);
@@ -38,29 +35,25 @@
   }
 
   .dark {
-    --background: 168 35% 7%;
-    --foreground: 152 28% 94%;
-    --card: 168 28% 10%;
-    --card-foreground: 152 28% 94%;
-    --popover: 168 28% 10%;
-    --popover-foreground: 152 28% 94%;
-    --primary: 158 35% 68%;
-    --primary-foreground: 168 42% 10%;
-    --secondary: 168 22% 16%;
-    --secondary-foreground: 152 28% 92%;
-    --muted: 168 20% 14%;
-    --muted-foreground: 152 12% 65%;
-    --accent: 162 40% 42%;
-    --accent-foreground: 152 35% 96%;
-    --destructive: 0 62% 42%;
+    --background: 162 30% 9%;
+    --foreground: 155 60% 94%;
+    --card: 162 30% 12%;
+    --card-foreground: 155 60% 94%;
+    --popover: 162 30% 12%;
+    --popover-foreground: 155 60% 94%;
+    --primary: 155 60% 94%;
+    --primary-foreground: 172 100% 14%;
+    --secondary: 160 73% 22%;
+    --secondary-foreground: 155 60% 94%;
+    --muted: 162 30% 20%;
+    --muted-foreground: 155 30% 70%;
+    --accent: 162 46% 34%;
+    --accent-foreground: 155 60% 94%;
+    --destructive: 0 62% 30%;
     --destructive-foreground: 0 0% 98%;
-    --border: 168 18% 18%;
-    --input: 168 18% 18%;
-    --ring: 158 35% 68%;
-    --surface: 168 30% 9%;
-    --surface-elevated: 168 28% 12%;
-    --success: 158 40% 48%;
-    --warning: 38 75% 52%;
+    --border: 162 30% 20%;
+    --input: 162 30% 20%;
+    --ring: 155 60% 94%;
   }
 }
 
@@ -74,11 +67,10 @@
     font-size: 16px;
     height: 100%;
     height: -webkit-fill-available;
-    scroll-behavior: smooth;
   }
 
   body {
-    @apply bg-background text-foreground font-sans antialiased;
+    @apply bg-background text-foreground font-sans;
     font-feature-settings:
       "rlig" 1,
       "calt" 1;
@@ -87,16 +79,13 @@
     min-height: 100vh;
     min-height: -webkit-fill-available;
     overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    /* Prevent zoom on iOS */
     -webkit-text-size-adjust: 100%;
+    /* Better touch scrolling on iOS */
     -webkit-overflow-scrolling: touch;
-  }
-
-  h1,
-  h2,
-  .font-display {
-    font-family: "Fraunces", "Space Grotesk", Georgia, serif;
-    letter-spacing: -0.02em;
   }
 
   #root {
@@ -108,12 +97,9 @@
     flex-direction: column;
   }
 
-  ::selection {
-    background: hsl(172 100% 14% / 0.15);
-  }
-
+  /* Custom scrollbar for webkit browsers */
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 4px;
   }
 
   ::-webkit-scrollbar-track {
@@ -121,19 +107,21 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-emerald-touch/35 rounded-full;
+    @apply bg-emerald-touch/30 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-emerald-touch/55;
+    @apply bg-emerald-touch/50;
   }
 
+  /* Remove default button styling */
   button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
   }
 
+  /* Better input styling on mobile */
   input,
   textarea,
   select {
@@ -143,6 +131,7 @@
     appearance: none;
   }
 
+  /* Prevent zoom on input focus (iOS) */
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -150,50 +139,76 @@
   input[type="tel"],
   input[type="url"],
   input[type="search"],
-  input[type="datetime-local"],
   textarea,
   select {
     font-size: 16px;
   }
-
-  :focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-  }
 }
 
 @layer components {
+  /* Native app-like container */
   .app-container {
-    @apply relative w-full h-full flex flex-col bg-background;
+    @apply relative w-full h-full flex flex-col;
     padding-top: var(--safe-area-inset-top);
     padding-bottom: var(--safe-area-inset-bottom);
     padding-left: var(--safe-area-inset-left);
     padding-right: var(--safe-area-inset-right);
   }
 
+  /* Mobile-first page wrapper */
   .mobile-page {
     @apply flex-1 flex flex-col relative;
-    min-height: 0;
+    min-height: 0; /* Important for flex layout */
   }
 
+  /* Native-style header */
   .mobile-header {
-    @apply sticky top-0 z-50 border-b border-border/80 bg-card/90 backdrop-blur-xl;
+    @apply sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-forest-deep/5;
     padding-top: max(var(--safe-area-inset-top), 0.5rem);
   }
 
+  /* Content area with safe spacing */
   .mobile-content {
     @apply flex-1 overflow-auto;
     padding-bottom: max(var(--safe-area-inset-bottom), 1rem);
   }
 
-  .mobile-padding {
-    @apply px-4 sm:px-6;
+  /* Native app button styles */
+  .btn-native {
+    @apply bg-forest-deep text-white font-semibold px-6 py-4 rounded-2xl transition-all duration-200 shadow-lg;
+    @apply active:scale-95 active:shadow-md;
+    @apply hover:bg-pine-fade hover:shadow-xl;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20;
+    touch-action: manipulation;
   }
 
-  .mobile-section {
-    @apply py-6 sm:py-8;
+  .btn-native-outline {
+    @apply border-2 border-forest-deep text-forest-deep font-semibold px-6 py-4 rounded-2xl transition-all duration-200;
+    @apply active:scale-95 active:bg-forest-deep/5;
+    @apply hover:bg-forest-deep hover:text-white;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20;
+    touch-action: manipulation;
   }
 
+  .btn-native-ghost {
+    @apply text-forest-deep font-medium px-6 py-4 rounded-2xl transition-all duration-200;
+    @apply active:scale-95 active:bg-forest-deep/5;
+    @apply hover:bg-forest-deep/5;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20;
+    touch-action: manipulation;
+  }
+
+  /* Native card styling */
+  .card-native {
+    @apply bg-white/60 backdrop-blur-md border border-white/40 rounded-3xl shadow-xl;
+    @apply transition-all duration-300;
+  }
+
+  .card-native:hover {
+    @apply shadow-2xl transform scale-[1.02];
+  }
+
+  /* Mobile-optimized spacing */
   .mobile-spacing {
     @apply px-4 py-6 sm:px-6 sm:py-8;
   }
@@ -202,70 +217,35 @@
     @apply px-4 py-3 sm:px-6 sm:py-4;
   }
 
-  .page-shell {
-    @apply min-h-full bg-background;
-    background-image:
-      radial-gradient(
-        ellipse 80% 50% at 50% -20%,
-        hsl(172 40% 40% / 0.08),
-        transparent
-      ),
-      linear-gradient(
-        180deg,
-        hsl(var(--surface)) 0%,
-        hsl(var(--background)) 40%
-      );
-  }
-
-  .btn-native,
-  .btn-keepr {
-    @apply inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground font-semibold px-6 py-3.5 rounded-2xl transition-all duration-200;
-    @apply shadow-sm shadow-forest-deep/15;
-    @apply active:scale-[0.98];
-    @apply hover:bg-pine-fade hover:shadow-md;
-    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-forest-deep/25;
-    touch-action: manipulation;
-  }
-
-  .btn-native-outline {
-    @apply inline-flex items-center justify-center gap-2 border-2 border-forest-deep text-forest-deep font-semibold px-6 py-3.5 rounded-2xl transition-all duration-200 bg-transparent;
-    @apply active:scale-[0.98] active:bg-forest-deep/5;
-    @apply hover:bg-forest-deep hover:text-white;
-    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-forest-deep/20;
-    touch-action: manipulation;
-  }
-
-  .btn-native-ghost {
-    @apply inline-flex items-center justify-center gap-2 text-forest-deep font-medium px-6 py-3.5 rounded-2xl transition-all duration-200;
-    @apply active:scale-[0.98] active:bg-forest-deep/5;
-    @apply hover:bg-forest-deep/5;
-    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-forest-deep/20;
-    touch-action: manipulation;
-  }
-
-  .card-native {
-    @apply bg-card border border-border/70 rounded-2xl shadow-sm;
-    @apply transition-all duration-200;
-  }
-
-  .card-native:hover {
-    @apply border-forest-deep/20 shadow-md;
-  }
-
-  .card-keepr {
-    @apply bg-card border border-border/70 rounded-2xl shadow-sm;
-  }
-
+  /* Touch-friendly interactive elements */
   .touch-target {
     min-height: 44px;
     min-width: 44px;
     @apply flex items-center justify-center;
   }
 
+  /* Smooth page transitions */
   .page-transition {
     @apply transition-all duration-300 ease-out;
   }
 
+  .page-enter {
+    @apply opacity-0 translate-y-4;
+  }
+
+  .page-enter-active {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .page-exit {
+    @apply opacity-100 translate-y-0;
+  }
+
+  .page-exit-active {
+    @apply opacity-0 -translate-y-4;
+  }
+
+  /* Native-style progress indicators */
   .progress-dots {
     @apply flex gap-2 justify-center;
   }
@@ -282,65 +262,50 @@
     @apply bg-forest-deep/20;
   }
 
+  /* Floating action button */
   .fab {
-    @apply fixed bottom-6 right-6 w-14 h-14 bg-forest-deep text-white rounded-full shadow-lg;
+    @apply fixed bottom-6 right-6 w-14 h-14 bg-forest-deep text-white rounded-full shadow-2xl;
     @apply flex items-center justify-center transition-all duration-300;
-    @apply active:scale-90 hover:bg-pine-fade hover:shadow-xl;
-    @apply focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-forest-deep/30;
+    @apply active:scale-90 hover:shadow-2xl hover:bg-pine-fade;
     z-index: 1000;
     bottom: max(1.5rem, var(--safe-area-inset-bottom));
   }
 
+  /* Native input styling */
   .input-native {
-    @apply w-full px-4 py-3.5 bg-card border border-border rounded-xl;
-    @apply text-foreground placeholder:text-muted-foreground;
-    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/15 focus:border-forest-deep;
+    @apply w-full px-4 py-4 bg-white/60 backdrop-blur-md border border-white/40 rounded-2xl;
+    @apply text-forest-deep placeholder-forest-deep/50;
+    @apply focus:outline-none focus:ring-4 focus:ring-forest-deep/20 focus:border-forest-deep;
     @apply transition-all duration-200;
   }
 
-  .empty-state {
-    @apply flex flex-col items-center justify-center text-center py-12 px-6;
+  /* Status bar styling */
+  .status-bar-bg {
+    background: linear-gradient(
+      135deg,
+      rgba(234, 245, 239, 0.95) 0%,
+      rgba(0, 71, 62, 0.05) 100%
+    );
   }
 
-  .empty-state-icon {
-    @apply w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center mb-4 text-forest-deep;
-  }
-
-  .stat-tile {
-    @apply card-keepr p-4;
-  }
-
-  .brand-mark {
-    @apply w-10 h-10 rounded-2xl bg-gradient-to-br from-forest-deep to-pine-fade flex items-center justify-center shadow-sm;
-  }
-
-  .app-footer-bar {
-    @apply fixed inset-x-0 bottom-0 z-10 pointer-events-none pb-[max(0.75rem,env(safe-area-inset-bottom))];
-  }
-
-  .app-footer-inner {
-    @apply pointer-events-auto mx-auto inline-flex items-center gap-4 rounded-full border border-border/80 bg-card/95 px-5 py-2 text-sm font-medium text-foreground shadow-sm backdrop-blur-md;
-  }
-
-  .app-footer-link {
-    @apply text-muted-foreground transition-colors hover:text-forest-deep focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-sm;
-  }
-
+  /* Native list styling */
   .list-native {
     @apply space-y-2;
   }
 
   .list-item-native {
-    @apply bg-card border border-border/70 rounded-2xl p-4;
+    @apply bg-white/60 backdrop-blur-md border border-white/40 rounded-2xl p-4;
     @apply transition-all duration-200 active:scale-[0.98];
   }
 
+  /* Bottom sheet style modal */
   .bottom-sheet {
-    @apply fixed inset-x-0 bottom-0 bg-card rounded-t-3xl shadow-2xl border-t border-border;
+    @apply fixed inset-x-0 bottom-0 bg-white rounded-t-3xl shadow-2xl;
     @apply transition-transform duration-300 ease-out;
     padding-bottom: var(--safe-area-inset-bottom);
   }
 
+  /* Haptic feedback simulation */
   .haptic-light {
     @apply transition-all duration-75 active:scale-95;
   }
@@ -352,28 +317,9 @@
   .haptic-heavy {
     @apply transition-all duration-150 active:scale-85;
   }
-
-  .hero-atmosphere {
-    background:
-      radial-gradient(
-        ellipse 90% 60% at 70% 10%,
-        hsl(162 40% 40% / 0.12),
-        transparent 55%
-      ),
-      radial-gradient(
-        ellipse 70% 50% at 10% 80%,
-        hsl(172 60% 20% / 0.08),
-        transparent 50%
-      ),
-      linear-gradient(
-        165deg,
-        hsl(152 35% 96%) 0%,
-        hsl(152 28% 97%) 45%,
-        hsl(160 20% 94%) 100%
-      );
-  }
 }
 
+/* iOS specific styles */
 @supports (-webkit-touch-callout: none) {
   .ios-bounce-fix {
     -webkit-overflow-scrolling: touch;
@@ -385,6 +331,7 @@
   }
 }
 
+/* Android specific styles */
 @media (hover: none) and (pointer: coarse) {
   .touch-device .hover\:scale-105:hover {
     transform: scale(1);
@@ -395,22 +342,20 @@
   }
 }
 
+/* High contrast mode support */
 @media (prefers-contrast: high) {
-  .card-native,
-  .card-keepr {
+  .card-native {
     @apply border-2 border-forest-deep;
   }
 
-  .btn-native,
-  .btn-keepr {
+  .btn-native {
     @apply border-2 border-forest-deep;
   }
 }
 
+/* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -418,6 +363,15 @@
   }
 }
 
+/* Dark mode media query support */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: 162 30% 9%;
+    --foreground: 155 60% 94%;
+  }
+}
+
+/* Landscape orientation adjustments */
 @media (orientation: landscape) and (max-height: 500px) {
   .mobile-spacing {
     @apply px-4 py-2 sm:px-6 sm:py-3;
@@ -428,6 +382,7 @@
   }
 }
 
+/* Loading shimmer effect */
 @keyframes shimmer {
   0% {
     background-position: -200px 0;
@@ -437,36 +392,13 @@
   }
 }
 
-@keyframes fade-up {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
 .shimmer {
   background: linear-gradient(
     90deg,
-    hsl(var(--muted)) 0px,
-    hsl(162 30% 90%) 40px,
-    hsl(var(--muted)) 80px
+    rgba(234, 245, 239, 0.2) 0px,
+    rgba(47, 127, 109, 0.1) 40px,
+    rgba(234, 245, 239, 0.2) 80px
   );
   background-size: 400px;
   animation: shimmer 1.5s ease-in-out infinite;
-}
-
-.animate-fade-up {
-  animation: fade-up 0.5s ease-out both;
-}
-
-.animate-fade-up-delay {
-  animation: fade-up 0.55s ease-out 0.12s both;
-}
-
-.animate-fade-up-delay-2 {
-  animation: fade-up 0.55s ease-out 0.22s both;
 }
