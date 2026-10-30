@@ -227,7 +227,7 @@ export default function KeepDetails() {
 
       return (
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-lg border border-forest-deep/10">
+          <div className="bg-white p-4 rounded-lg border ">
             <h3 className="font-semibold text-forest-deep mb-2">
               Content Preview
             </h3>
@@ -247,7 +247,7 @@ export default function KeepDetails() {
       // If text decoding fails, show as binary
       return (
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-lg border border-forest-deep/10">
+          <div className="bg-white p-4 rounded-lg border ">
             <h3 className="font-semibold text-forest-deep mb-2">
               Binary Content
             </h3>
@@ -271,21 +271,21 @@ export default function KeepDetails() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-mist-green via-white to-mist-green">
-        <header className="border-b border-forest-deep/10 bg-white/50 backdrop-blur-sm">
+      <div className="min-h-screen page-shell pb-16">
+        <header className="mobile-header">
           <div className="mobile-padding py-4">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="text-forest-deep"
+                className="text-forest-deep hover:bg-secondary rounded-xl"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-forest-deep" />
-                <h1 className="text-lg font-bold text-forest-deep">
+                <h1 className="font-display text-lg text-forest-deep">
                   Keep Details
                 </h1>
               </div>
@@ -319,21 +319,21 @@ export default function KeepDetails() {
 
   if (!keepData) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-mist-green via-white to-mist-green">
-        <header className="border-b border-forest-deep/10 bg-white/50 backdrop-blur-sm">
+      <div className="min-h-screen page-shell pb-16">
+        <header className="mobile-header">
           <div className="mobile-padding py-4">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="text-forest-deep"
+                className="text-forest-deep hover:bg-secondary rounded-xl"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-forest-deep" />
-                <h1 className="text-lg font-bold text-forest-deep">
+                <h1 className="font-display text-lg text-forest-deep">
                   Keep Details
                 </h1>
               </div>
@@ -342,7 +342,7 @@ export default function KeepDetails() {
         </header>
         <main className="mobile-padding mobile-section">
           <div className="max-w-2xl mx-auto">
-            <Card className="border-forest-deep/10">
+            <Card className="">
               <CardContent className="pt-6">
                 <p className="text-muted-foreground">Keep not found.</p>
                 <Button onClick={() => navigate("/dashboard")} className="mt-4">
@@ -357,9 +357,9 @@ export default function KeepDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-mist-green via-white to-mist-green">
+    <div className="min-h-screen page-shell pb-16">
       {/* Header */}
-      <header className="border-b border-forest-deep/10 bg-white/50 backdrop-blur-sm">
+      <header className="mobile-header">
         <div className="mobile-padding py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -367,7 +367,7 @@ export default function KeepDetails() {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate("/dashboard")}
-                className="text-forest-deep"
+                className="text-forest-deep hover:bg-secondary rounded-xl"
               >
                 <ArrowLeft className="w-4 h-4" />
               </Button>
@@ -378,7 +378,7 @@ export default function KeepDetails() {
                     className: "w-5 h-5 text-forest-deep",
                   },
                 )}
-                <h1 className="text-lg font-bold text-forest-deep">
+                <h1 className="font-display text-lg text-forest-deep">
                   {keepData.meta?.title || "Keep Details"}
                 </h1>
               </div>
@@ -397,7 +397,7 @@ export default function KeepDetails() {
             </TabsList>
 
             <TabsContent value="details" className="space-y-6">
-              <Card className="border-forest-deep/10 mt-8">
+              <Card className=" mt-8">
                 <CardHeader>
                   <CardTitle className="text-forest-deep flex items-center gap-2">
                     <Shield className="w-5 h-5" />
@@ -443,7 +443,7 @@ export default function KeepDetails() {
                         <label className="text-sm font-medium text-muted-foreground">
                           Unlock Time
                         </label>
-                        <p className="text-forest-deep">
+                        <p className="text-forest-deep hover:bg-secondary rounded-xl">
                           {format(
                             new Date(keepData.meta.unlockTime),
                             "PPP 'at' p",
@@ -458,7 +458,7 @@ export default function KeepDetails() {
                       <label className="text-sm font-medium text-muted-foreground">
                         Description
                       </label>
-                      <p className="text-forest-deep">
+                      <p className="text-forest-deep hover:bg-secondary rounded-xl">
                         {keepData.meta.description}
                       </p>
                     </div>
@@ -468,7 +468,7 @@ export default function KeepDetails() {
             </TabsContent>
 
             <TabsContent value="content" className="space-y-6">
-              <Card className="border-forest-deep/10">
+              <Card className="">
                 <CardHeader>
                   <CardTitle className="text-forest-deep flex items-center gap-2">
                     <Lock className="w-5 h-5" />
