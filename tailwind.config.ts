@@ -19,22 +19,43 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Space Grotesk", "sans-serif"],
+        sans: ["Space Grotesk", "system-ui", "sans-serif"],
+        display: ["Fraunces", "Space Grotesk", "Georgia", "serif"],
+      },
+      fontSize: {
+        "display-sm": [
+          "1.75rem",
+          { lineHeight: "1.2", letterSpacing: "-0.02em", fontWeight: "600" },
+        ],
+        "display-md": [
+          "2.25rem",
+          { lineHeight: "1.15", letterSpacing: "-0.025em", fontWeight: "600" },
+        ],
+        "display-lg": [
+          "2.75rem",
+          { lineHeight: "1.1", letterSpacing: "-0.03em", fontWeight: "700" },
+        ],
+      },
+      spacing: {
+        18: "4.5rem",
+        22: "5.5rem",
       },
       colors: {
-        // Keepr brand colors - monochrome green palette
         "forest-deep": "#00473E",
         "pine-fade": "#0A5F4A",
         "mist-green": "#EAF5EF",
         "ink-green": "#0D1F1A",
         "emerald-touch": "#2F7F6D",
 
-        // Mapped to semantic tokens
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        surface: {
+          DEFAULT: "hsl(var(--surface))",
+          elevated: "hsl(var(--surface-elevated))",
+        },
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
@@ -63,11 +84,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        success: "hsl(var(--success))",
+        warning: "hsl(var(--warning))",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      boxShadow: {
+        soft: "0 1px 2px hsl(168 30% 10% / 0.04), 0 8px 24px hsl(168 30% 10% / 0.06)",
+        lift: "0 4px 16px hsl(172 40% 14% / 0.1)",
       },
       keyframes: {
         "accordion-down": {

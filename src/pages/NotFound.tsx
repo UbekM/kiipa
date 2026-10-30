@@ -1,5 +1,6 @@
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useEffect } from "react";
+import { Shield } from "lucide-react";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,26 +13,28 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-blue-100">
-      <div className="bg-white shadow-lg rounded-lg p-8 max-w-md w-full text-center">
-        <h1 className="text-6xl font-extrabold text-blue-700 mb-4">404</h1>
-        <p className="text-2xl text-gray-700 mb-4">Oops! Page not found</p>
-        <p className="mb-6 text-gray-500">
-          The page you are looking for does not exist or has been moved.
+    <div className="min-h-screen flex items-center justify-center page-shell px-4">
+      <div className="text-center max-w-sm w-full animate-fade-up">
+        <div className="brand-mark w-14 h-14 mx-auto mb-6">
+          <Shield className="w-7 h-7 text-white" />
+        </div>
+        <p className="font-display text-5xl text-forest-deep mb-2">404</p>
+        <h1 className="font-display text-xl text-forest-deep mb-2">
+          Page not found
+        </h1>
+        <p className="text-muted-foreground text-sm mb-8 leading-relaxed">
+          This path doesn&apos;t exist in Keepr. Head home or check the docs.
         </p>
-        <a
-          href="/"
-          className="inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition mb-2"
-        >
-          Return to Home
-        </a>
-        <div className="mt-4">
-          <a
-            href="/documentation"
-            className="text-blue-500 hover:text-blue-700 underline"
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Link to="/" className="btn-keepr">
+            Return home
+          </Link>
+          <Link
+            to="/documentation"
+            className="btn-native-outline px-6 py-3.5 text-sm"
           >
-            View Documentation
-          </a>
+            Documentation
+          </Link>
         </div>
       </div>
     </div>
