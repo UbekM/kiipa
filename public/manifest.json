@@ -1,9 +1,9 @@
 {
-  "name": "Keepr - Secure Your Digital Legacy",
+  "name": "Keepr",
   "short_name": "Keepr",
-  "description": "Decentralized inheritance and secret-keeping protocol. Secure your digital legacy with trustless, encrypted storage on blockchain.",
+  "description": "Encrypted keeps for the people you trust. Decentralized digital inheritance on Lisk.",
   "theme_color": "#00473E",
-  "background_color": "#EAF5EF",
+  "background_color": "#F5FAF7",
   "display": "standalone",
   "scope": "/",
   "start_url": "/",
