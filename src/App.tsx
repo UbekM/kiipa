@@ -21,65 +21,19 @@ function AppRoutes() {
   const location = useLocation();
   const isSplash = location.pathname === "/";
 
-  // Footer links for fallback and documentation
   const FooterLinks = () => (
-    <footer
-      style={{
-        width: "100%",
-        textAlign: "center",
-        padding: "1.5rem 0 1rem 0",
-        position: "fixed",
-        left: 0,
-        bottom: 0,
-        background: "transparent",
-        zIndex: 10,
-        fontSize: "0.92rem", // smaller font
-        pointerEvents: "none",
-      }}
-    >
-      <div
-        style={{
-          display: "inline-block",
-          background: "rgba(255,255,255,0.85)",
-          borderRadius: 12,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.03)",
-          padding: "0.35rem 1.1rem",
-          pointerEvents: "auto",
-        }}
-      >
-        <a
-          href="/fallback-claim"
-          style={{
-            marginRight: "1.2rem",
-            color: "#222", // darker text
-            textDecoration: "none",
-            fontWeight: 500,
-          }}
-        >
-          Fallback Claim
+    <footer className="app-footer-bar flex justify-center">
+      <nav className="app-footer-inner" aria-label="App links">
+        <a href="/fallback-claim" className="app-footer-link">
+          Fallback claim
         </a>
-        <a
-          href="/documentation"
-          style={{
-            color: "#222", // darker text
-            textDecoration: "none",
-            fontWeight: 500,
-          }}
-        >
+        <span className="text-border" aria-hidden>
+          ·
+        </span>
+        <a href="/documentation" className="app-footer-link">
           Documentation
         </a>
-      </div>
-      {/* Style for PWA install prompt/button */}
-      <style>
-        {`
-          .pwa-install-btn, .pwa-install, .pwa-install-button, .pwa-install-banner button {
-            color: #222 !important;
-            background: #fff !important;
-            border: 1px solid #ddd !important;
-            font-weight: 600 !important;
-          }
-        `}
-      </style>
+      </nav>
     </footer>
   );
 
